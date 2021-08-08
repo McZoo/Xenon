@@ -2,7 +2,7 @@
 
 | Usable | Full | Info                                                         |
 | ------ | ---- | ------------------------------------------------------------ |
-| Yes    | No   | Console Support （Usable, but currently not supporting formatted text, see [PT#1453](https://github.com/prompt-toolkit/python-prompt-toolkit/issues/1453)) |
+| Yes    | No   | Console Support （Usable, but latest PT on PyPI is not supporting formatted text, see [PT_PR#1455](https://github.com/prompt-toolkit/python-prompt-toolkit/pull/1455)) |
 | Yes    | Maybe   | Integrate Logger                                             |
 | Yes    | Maybe   | Configurator                                                 |
 | Yes     | No   | Dependency solver                                            |
