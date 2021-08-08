@@ -1,0 +1,9 @@
+config/*.yml
+data/*
+__pycache__/
+*.pyc
+.idea/
+venv/
+external/*
+log/*
+external/nsfw_detector.py
