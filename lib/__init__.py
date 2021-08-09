@@ -28,6 +28,13 @@ class Version:
         return f'<Version {self.__str__()}>'
 
 
+@dataclasses.dataclass
+class XenonContext:
+    con: 'console.Console'
+    logger: 'log.Logger'
+    plugins: 'plugin.XenonPluginList'
+
+
 if not TYPE_CHECKING:  # real importing work
     from . import path, log, console, config, database
     from . import dependency, plugin, utils

@@ -3,8 +3,8 @@ import json
 import os.path
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Dict, Union, Type, Any, NamedTuple, List, TypeVar, Callable
 from types import FunctionType
+from typing import Dict, Union, Type, Any, NamedTuple, List, TypeVar, Callable
 
 import yaml
 
@@ -30,17 +30,17 @@ def resolve(cls: Type['XenonConfigTemplate']) -> List[ResolveEntry]:
     Process a "XenonConfigTemplate" class recursively
     """
     if cls.resolve_result_cache__ is None:
-        annotations = cls.__annotations__ | {k: v for k, v in vars(cls).items() if
-                                             not k.startswith('_') and not k.endswith('_') and
-                                             type(v) is type}
+        annotations: Dict[str, Union[type, Type['XenonConfigTemplate']]] = \
+            cls.__annotations__ | {k: v for k, v in vars(cls).items() if not k.startswith('_')
+                                   and not k.endswith('_') and type(v) is type}
         default = {k: v for k, v in vars(cls).items() if
                    not k.startswith('_') and not k.endswith('_') and not type(v) is type}
-        subclass = {k: v.resolve_() for k, v in vars(cls).items() if
-                    not k.startswith('_') and not k.endswith('_') and type(v) is type}
+        subclass = {k: v.resolve_() for k, v in vars(cls).items() if not k.startswith('_')
+                    and not k.endswith('_') and type(v) is type}
         result = list()
         for k, v in annotations.items():
-            _default = default[k] if k in default else None
-            _subclass = subclass[k] if k in subclass else None
+            _default = default[k] if k in default else MISSING
+            _subclass = subclass[k] if k in subclass else MISSING
             result.append(ResolveEntry(k, v, _default, _subclass))
         cls.resolve_result_cache__ = result
     return cls.resolve_result_cache__
@@ -56,7 +56,7 @@ class XenonConfigTemplate(ABC):
         pass
 
 
-T_Config = TypeVar("T_Config")
+T_Config = TypeVar("T_Config", XenonConfigTemplate, object)
 
 
 def parse_from_dict(cls: Type[T_Config], content: Dict[str, Any]):
