@@ -124,6 +124,11 @@ def parse(cls: Type[T_Config], name: str) -> T_Config:
 
 
 def config(cls: type, /):
+    """
+    @decorator recursively add `resolve_` method to a class to make it a `XenonConfigTemplate`
+    :param cls: class
+    :return: original class, casted to `XenonConfigTemplate`
+    """
     cls.resolve_ = functools.partial(resolve, cls)
     cls.resolve_result_cache__ = None
     subclasses = {key: s_cls for key, s_cls in vars(cls).items() if type(s_cls) is type}

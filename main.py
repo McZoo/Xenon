@@ -15,10 +15,11 @@ if __name__ == '__main__':
     session = lib.utils.get_session(con, logger)
     app = GraiaMiraiApplication(broadcast=bcc, connect_info=session)
     plugins = lib.plugin.XenonPluginList.load_plugins()
-    lib.utils.log_unloaded_plugins(logger, plugins)
     ctx = lib.XenonContext(con, logger, plugins)
-    plugins.execute_main(ctx)
+    plugins.set_ctx(ctx)
+    plugins.prepare()
     try:
         app.launch_blocking()
     except (asyncio.exceptions.CancelledError, InvaildSession):
         con.stop()
+        con.join()

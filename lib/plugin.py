@@ -3,7 +3,7 @@ import dataclasses
 import importlib
 import os
 from types import MethodType
-from typing import List, NamedTuple, cast
+from typing import List, NamedTuple, cast, Type, Optional
 
 from . import dependency, config, Version, path, XenonContext
 
@@ -16,16 +16,18 @@ class XenonPluginSpec:
     or use the `__init__` method to build a new instance of XenonPluginSpec
     """
     depend: dependency.DependencyEntry
-    config_template: config.XenonConfigTemplate
+    config_template: Type[config.XenonConfigTemplate]
     version: Version
     name: str
+    cfg: Optional[config.XenonConfigTemplate]
 
-    def __init__(self, depend: dependency.DependencyEntry, cfg: config.XenonConfigTemplate, version: Version,
-                 name: str):
+    def __init__(self, depend: dependency.DependencyEntry, config_template: Type[config.XenonConfigTemplate],
+                 version: Version, name: str):
         self.depend = depend
-        self.cfg = cfg
+        self.config_template = config_template
         self.version = version
         self.name = name
+        self.cfg = None
 
     def __instancecheck__(self, instance) -> bool:
         """
@@ -33,7 +35,7 @@ class XenonPluginSpec:
         :param instance: subclass / real_instance
         :return: bool
         """
-        if hasattr(instance, 'depend') and hasattr(instance, 'cfg') \
+        if hasattr(instance, 'depend') and hasattr(instance, 'config_template') \
                 and hasattr(instance, 'version') and hasattr(instance, 'name'):
             """
             here we don't check properties' type to reduce coding work
@@ -41,6 +43,9 @@ class XenonPluginSpec:
             return True
         else:
             return False
+
+    def load_config(self):
+        self.cfg = config.parse(self.config_template, self.name)
 
 
 class XenonPlugin(abc.ABC):
@@ -88,7 +93,8 @@ class UnloadedXenonPlugin(NamedTuple):
     name: str
 
 
-class XenonPluginList(NamedTuple):
+class XenonPluginList:
+    ctx: XenonContext
     loaded: List[XenonPlugin] = []
     unloaded: List[UnloadedXenonPlugin] = []
     broken: List[str] = []  # this is a exception because they are unable to be imported
@@ -120,6 +126,36 @@ class XenonPluginList(NamedTuple):
                         UnloadedXenonPlugin(current_plugin, unmatched_dependency, name))
         return result
 
-    def execute_main(self, ctx: XenonContext):
+    def set_ctx(self, ctx: XenonContext):
+        self.ctx = ctx
+
+    def log_unloaded_plugins(self):
+        for i in self.unloaded:
+            self.ctx.logger.error(f"Plugin {i.name} is unloaded due to following\n"
+                                  "PyPI modules:")
+            self.ctx.logger.error("\n".join(i.dependency.pypi))
+            self.ctx.logger.error("And following\n"
+                                  "EXTERNAL modules:")
+            self.ctx.logger.error("\n".join(i.dependency.name))
+
+    def load_config(self):
+        require_remove: List[XenonPlugin] = []
         for plugin in self.loaded:
-            plugin.main(ctx)
+            try:
+                plugin.plugin_spec.load_config()
+            except Exception as e:
+                self.ctx.logger.error(f"Plugin {plugin.plugin_spec.name}'s config file is abnormal:")
+                self.ctx.logger.error(f"{e}: {e.args}")
+                require_remove.append(plugin)
+        for i in require_remove:
+            self.loaded.remove(i)
+            self.broken.append(i.plugin_spec.name)
+
+    def execute_main(self):
+        for plugin in self.loaded:
+            plugin.main(self.ctx)
+
+    def prepare(self):
+        self.log_unloaded_plugins()
+        self.load_config()
+        self.execute_main()
