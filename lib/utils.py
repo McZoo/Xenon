@@ -1,15 +1,13 @@
-import logging
-
 from graia.application import Session
 from pydantic import AnyHttpUrl
 
-from . import console, config, log, plugin
+from . import console, config, log
 
 
 @config.config
 class SessionConfig:
     host: AnyHttpUrl
-    account: int
+    account: int = config.Entry(func=int)
     authKey: str
 
 
@@ -34,4 +32,3 @@ def get_session(con: console.Console, logger: log.Logger) -> Session:
             else:
                 con.in_queue.put(in_str)
     return Session(host=cfg.host, authKey=cfg.authKey, account=cfg.account)
-

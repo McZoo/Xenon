@@ -7,8 +7,8 @@
 | Yes    | Quite   | Configurator                                                 |
 | Yes     | No   | Dependency solver                                            |
 | Yes     | No   | Plugin loader and info checker                               |
-| Maybe?     | No   | Main program |
+| Yes     | No   | Main program 
+| Yes     | No   | Database Management                                          |
+| Yes     | No   | Permission Management                                        |
 | No     | No   | Command Registration                                         |
-| No     | No   | Database Management                                          |
-| No     | No   | Permission Management                                        |
 

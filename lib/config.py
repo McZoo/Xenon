@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from functools import partial
 from types import FunctionType
 from typing import Dict, Union, Type, Any, NamedTuple, List, TypeVar, Callable
+import decimal
 
 import yaml
 
@@ -15,7 +16,7 @@ MISSING = object()
 
 class Entry(NamedTuple):
     value: Any = MISSING
-    cast_func: Callable[[Any], Any] = MISSING
+    func: Callable[[Any], Any] = MISSING
 
 
 class ResolveEntry(NamedTuple):
@@ -89,8 +90,8 @@ def parse_from_dict(cls: Type[T_Config], content: Dict[str, Any]):
             if type(entry.default) is not Entry:
                 setattr(new_instance, entry.name, content[entry.name])
             else:
-                if isinstance(entry.default.cast_func, FunctionType):
-                    setattr(new_instance, entry.name, entry.default.cast_func(content[entry.name]))
+                if isinstance(entry.default.func, FunctionType):
+                    setattr(new_instance, entry.name, entry.default.func(content[entry.name]))
                 else:
                     setattr(new_instance, entry.name, content[entry.name])
     return new_instance
@@ -104,6 +105,8 @@ def parse(cls: Type[T_Config], name: str) -> T_Config:
     :return: Config class's prepared instance
     :raises FileNotFoundError, KeyError
     """
+    if cls is None:
+        return None
     filepath_no_prefix = os.path.abspath(os.path.join(path.config, name))
     if os.path.isfile(filepath_no_prefix + '.yaml'):
         filename = filepath_no_prefix + '.yaml'
@@ -135,3 +138,24 @@ def config(cls: type, /):
     for k, sub_cls in subclasses.items():
         setattr(cls, k, config(sub_cls))
     return cls
+
+
+def bool_converter(value):
+    if type(value) is str:
+        value: str
+        if value.lower() in ("yes", "true", "ok"):
+            return True
+        elif value.lower() in ("no", "false"):
+            return False
+        else:
+            return value
+
+
+def decimal_converter(value):
+    if type(value) in (str, float, int):
+        try:
+            return decimal.Decimal(str(value))
+        except decimal.InvalidOperation:
+            return value
+    else:
+        return value

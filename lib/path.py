@@ -1,6 +1,7 @@
-import os
+from os.path import join, abspath
 
-root = os.path.abspath(os.path.join(__file__, '..', '..'))
-config = os.path.abspath(os.path.join(root, 'config'))
-log = os.path.abspath(os.path.join(root, 'log'))
-plugin = os.path.abspath(os.path.join(root, 'plugin'))
+root = abspath(join(__file__, '..', '..'))
+config = abspath(join(root, 'config'))
+log = abspath(join(root, 'log'))
+plugin = abspath(join(root, 'plugin'))
+database = abspath(join(root, "database"))

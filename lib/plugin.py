@@ -2,7 +2,7 @@ import abc
 import dataclasses
 import importlib
 import os
-from types import MethodType
+from types import FunctionType
 from typing import List, NamedTuple, cast, Type, Optional
 
 from . import dependency, config, Version, path, XenonContext
@@ -21,15 +21,16 @@ class XenonPluginSpec:
     name: str
     cfg: Optional[config.XenonConfigTemplate]
 
-    def __init__(self, depend: dependency.DependencyEntry, config_template: Type[config.XenonConfigTemplate],
-                 version: Version, name: str):
+    def __init__(self, version: Version, name: str,
+                 depend: dependency.DependencyEntry = None, config_template: Type[config.XenonConfigTemplate] = None):
         self.depend = depend
         self.config_template = config_template
         self.version = version
         self.name = name
         self.cfg = None
 
-    def __instancecheck__(self, instance) -> bool:
+    @staticmethod
+    def is_spec(instance) -> bool:
         """
         Override default instance checking behavior
         :param instance: subclass / real_instance
@@ -62,10 +63,14 @@ class XenonPlugin(abc.ABC):
     """
     plugin_spec: XenonPluginSpec
 
-    def __instancecheck__(self, instance):
-        if hasattr(instance, 'plugin_spec') and isinstance(instance.plugin_spec, XenonPluginSpec):
-            if hasattr(instance, 'load_dependency') and isinstance(instance.load_dependency, MethodType):
-                if hasattr(instance, 'main') and isinstance(instance.main, MethodType):
+    @staticmethod
+    def is_plugin(instance):
+        if hasattr(instance, 'plugin_spec') and (
+                isinstance(instance.plugin_spec, XenonPluginSpec) or XenonPluginSpec.is_spec(instance.plugin_spec)):
+            if hasattr(instance, 'main') and isinstance(instance.main, FunctionType):
+                if hasattr(instance, 'load_dependency') and isinstance(instance.load_dependency, FunctionType):
+                    return True
+                elif instance.plugin_spec.depend is None:
                     return True
         return False
 
@@ -107,19 +112,21 @@ class XenonPluginList:
             """
         result = cls()
         plugin_name_list = [i.removesuffix('.py') for i in os.listdir(path.plugin) if
-                            (not i.endswith('.ignore') and not i.endswith('.disabled'))]  # load list of plugins
+                            (not i.endswith('.ignore') and not i.endswith('.disabled')
+                             and not i.startswith("_"))]  # load list of plugins
         for name in plugin_name_list:
             import_path = ''.join(('plugin.', name))
             try:
-                current_plugin: XenonPlugin = cast(importlib.import_module(import_path), XenonPlugin)
-                if not isinstance(current_plugin, XenonPlugin):
+                current_plugin: XenonPlugin = cast(XenonPlugin, importlib.import_module(import_path))
+                if not XenonPlugin.is_plugin(current_plugin):
                     raise ImportError('The module is not Xenon Plugin')
             except ImportError:
                 result.broken.append(name)
             else:
                 dep_check_passed, unmatched_dependency = dependency.verify_dependency(current_plugin.plugin_spec.depend)
                 if dep_check_passed:
-                    current_plugin.load_dependency()
+                    if current_plugin.plugin_spec.depend is not None:
+                        current_plugin.load_dependency()
                     result.loaded.append(current_plugin)
                 else:
                     result.unloaded.append(
@@ -144,7 +151,7 @@ class XenonPluginList:
             try:
                 plugin.plugin_spec.load_config()
             except Exception as e:
-                self.ctx.logger.error(f"Plugin {plugin.plugin_spec.name}'s config file is abnormal:")
+                self.ctx.logger.error(f"Plugin {plugin.plugin_spec.name}'s config file is broken:")
                 self.ctx.logger.error(f"{e}: {e.args}")
                 require_remove.append(plugin)
         for i in require_remove:

@@ -32,11 +32,12 @@ class UnmatchedDependency(NamedTuple):
 def verify_dependency(dep: DependencyEntry) -> Tuple[bool, UnmatchedDependency]:
     result: UnmatchedDependency = UnmatchedDependency(pypi=[], name=[])
     success: bool = True
-    for name in dep.names:
-        if find_spec(name) is None:
-            success = False
-            if pypi_name := dep.name_to_pypi.get(name) is not None:  # we are able to resolve it to pypi
-                result.pypi.append(pypi_name)
-            else:
-                result.name.append(name)
+    if dep is not None:
+        for name in dep.names:
+            if find_spec(name) is None:
+                success = False
+                if pypi_name := dep.name_to_pypi.get(name) is not None:  # we are able to resolve it to pypi
+                    result.pypi.append(pypi_name)
+                else:
+                    result.name.append(name)
     return success, result
