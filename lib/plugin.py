@@ -19,13 +19,15 @@ class XenonPluginSpec:
     config_template: Type[config.XenonConfigTemplate]
     version: Version
     name: str
+    author: str
     cfg: Optional[config.XenonConfigTemplate]
 
-    def __init__(self, version: Version, name: str,
+    def __init__(self, version: Version, name: str, author: str,
                  depend: dependency.DependencyEntry = None, config_template: Type[config.XenonConfigTemplate] = None):
         self.depend = depend
         self.config_template = config_template
         self.version = version
+        self.author = author
         self.name = name
         self.cfg = None
 

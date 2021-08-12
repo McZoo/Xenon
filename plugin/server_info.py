@@ -13,6 +13,7 @@ from lib.command import CommandEvent
 plugin_spec = lib.plugin.XenonPluginSpec(
     lib.Version(0, 0, 1),
     "server_info",
+    "BlueGlassBlock",
     lib.dependency.DependencyEntry({"mcstatus": "mcstatus"}),
 )
 

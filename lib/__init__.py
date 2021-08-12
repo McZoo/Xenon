@@ -21,10 +21,10 @@ class Version:
     major: int = 0
     minor: int = 0
     micro: int = 0
-    serial: int = 0
+    serial: str = ""
 
     def __str__(self):
-        return f'{self.major}.{self.minor}.{self.micro}.{self.serial}'
+        return f'{self.major}.{self.minor}.{self.micro}-{self.serial}'
 
     def __repr__(self):
         return f'<Version {self.__str__()}>'
@@ -45,4 +45,4 @@ if not TYPE_CHECKING:  # real importing work
     from . import dependency, plugin, utils, database
     from . import permission, command
 
-xenon_version = Version(0, 0, 1)
+__version__ = Version(0, 1, 1, "")
