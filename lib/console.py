@@ -57,6 +57,7 @@ class Console(threading.Thread):
                 self.__input_func_await.append(func)
             else:
                 self.__input_func_task.append(func)
+
         return decorator
 
     def get_input(self) -> str:
@@ -73,11 +74,14 @@ class Console(threading.Thread):
 if __name__ == '__main__':
     con = Console()
 
+
     @con.register(need_await=True)
     async def stopper(command: str):
         if command == '.stop':
             con.stop()
         else:
             con.put_output(command)
+
+
     con.start()
     con.join()

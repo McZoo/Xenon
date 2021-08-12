@@ -17,7 +17,7 @@ class CommandEvent(MiraiEvent):
 
     Allowed Extra Parameters(提供的额外注解支持):
         GraiaMiraiApplication (annotation): 发布事件的应用实例
-    注意：当命令是本地console输入时，
+    注意：当命令是本地console输入时，msg_chain, user, group 皆为 None
     """
     type = "InvokeCommand"
     source: str
