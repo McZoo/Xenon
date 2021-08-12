@@ -68,19 +68,8 @@ class XenonPlugin(abc.ABC):
         if hasattr(instance, 'plugin_spec') and (
                 isinstance(instance.plugin_spec, XenonPluginSpec) or XenonPluginSpec.is_spec(instance.plugin_spec)):
             if hasattr(instance, 'main') and isinstance(instance.main, FunctionType):
-                if hasattr(instance, 'load_dependency') and isinstance(instance.load_dependency, FunctionType):
-                    return True
-                elif instance.plugin_spec.depend is None:
-                    return True
+                return True
         return False
-
-    @abc.abstractmethod
-    def load_dependency(self):
-        """
-        import all the modules from external
-        :return: None
-        """
-        pass
 
     @abc.abstractmethod
     def main(self, ctx: XenonContext):
@@ -125,8 +114,6 @@ class XenonPluginList:
             else:
                 dep_check_passed, unmatched_dependency = dependency.verify_dependency(current_plugin.plugin_spec.depend)
                 if dep_check_passed:
-                    if current_plugin.plugin_spec.depend is not None:
-                        current_plugin.load_dependency()
                     result.loaded.append(current_plugin)
                 else:
                     result.unloaded.append(
