@@ -10,5 +10,5 @@
 | Yes     | No   | Main program 
 | Yes     | No   | Database Management                                          |
 | Yes     | No   | Permission Management                                        |
-| No     | No   | Command Registration                                         |
+| Yes     | No   | Command Registration                                         |
 

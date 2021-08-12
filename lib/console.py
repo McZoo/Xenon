@@ -1,6 +1,5 @@
 import asyncio
 import queue
-import sys
 import threading
 from logging import LogRecord
 from typing import Callable, List, Coroutine
@@ -26,11 +25,11 @@ class Console(threading.Thread):
             await asyncio.sleep(0.01)
             if self.__out_queue.qsize():
                 msg = self.__out_queue.get()
-                print(msg, file=sys.stdout)
+                print(msg)
                 # TODO: replace this with prompt_toolkit.print_formatted_text after they fixed PT#1453
             if self.log_queue.qsize():
                 rec = self.log_queue.get()
-                print(rec.msg, file=sys.stderr)
+                print(rec.msg)
 
     async def _get_con_input(self):
         session = PromptSession()
@@ -50,6 +49,7 @@ class Console(threading.Thread):
 
     def stop(self):
         self.__running_flag = False
+        self.__out_queue.put("Press ENTER to quit program.")
 
     def register(self, need_await: bool = False):
         def decorator(func: Callable[[str], Coroutine]):

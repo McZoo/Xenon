@@ -17,6 +17,7 @@ if __name__ == '__main__':
     plugins = lib.plugin.XenonPluginList.load_plugins()
     ctx = lib.XenonContext(con, logger, plugins, loop, app, bcc)
     plugins.set_ctx(ctx)
+    lib.command.initialize(ctx)
     loop.run_until_complete(lib.permission.open_perm_db(ctx))
     plugins.prepare()
     try:
