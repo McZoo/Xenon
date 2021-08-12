@@ -25,4 +25,3 @@ if __name__ == '__main__':
     except (asyncio.exceptions.CancelledError, InvaildSession):
         loop.run_until_complete(lib.database.close_all())
         con.stop()
-        con.join()

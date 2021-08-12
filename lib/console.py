@@ -11,7 +11,7 @@ from prompt_toolkit.patch_stdout import patch_stdout
 class Console(threading.Thread):
 
     def __init__(self):
-        super().__init__(name='TerminalThread')
+        super().__init__(name='TerminalThread', daemon=True)
         self.__loop = asyncio.new_event_loop()
         self.__out_queue: queue.Queue[str] = queue.Queue()
         self.in_queue: queue.Queue[str] = queue.Queue()
@@ -49,7 +49,6 @@ class Console(threading.Thread):
 
     def stop(self):
         self.__running_flag = False
-        self.__out_queue.put("Press ENTER to quit program.")
 
     def register(self, need_await: bool = False):
         def decorator(func: Callable[[str], Coroutine]):
@@ -81,7 +80,6 @@ if __name__ == '__main__':
             con.stop()
         else:
             con.put_output(command)
-
 
     con.start()
     con.join()
