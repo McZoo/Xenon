@@ -1,85 +1,81 @@
-import asyncio
 import queue
 import threading
+import time
 from logging import LogRecord
 from typing import Callable, List, Coroutine
 
-from prompt_toolkit import PromptSession
+import graia.application
+from graia.broadcast import Broadcast
+from prompt_toolkit.shortcuts import prompt
 from prompt_toolkit.patch_stdout import patch_stdout
 
+from lib import permission
+from lib.command import CommandEvent
 
-class Console(threading.Thread):
 
-    def __init__(self):
-        super().__init__(name='TerminalThread', daemon=True)
-        self.__loop = asyncio.new_event_loop()
-        self.__out_queue: queue.Queue[str] = queue.Queue()
+class _InThread(threading.Thread):
+    def __init__(self, bcc: Broadcast, logger: graia.application.AbstractLogger):
+        super().__init__(name='Console_InThread')
         self.in_queue: queue.Queue[str] = queue.Queue()
-        self.__input_func_task: List[Callable[[str], Coroutine]] = []
-        self.__input_func_await: List[Callable[[str], Coroutine]] = []
+        self.__input_funcs: List[Callable[[str], Coroutine]] = []
+        self.__running_flag = False
+        self.bcc = bcc
+        self.logger = logger
+
+    def run(self):
+        self.__running_flag = True
+        while self.__running_flag:
+            with patch_stdout():
+                curr_input = prompt('> ')
+            self.in_queue.put(curr_input)
+            if self.bcc.loop.is_running():
+                self.bcc.postEvent(CommandEvent("local", curr_input, permission.ADMIN))
+
+    def stop(self):
+        self.__running_flag = False
+
+
+class _OutThread(threading.Thread):
+    def __init__(self):
+        super().__init__(name='Console_OutThread')
+        self.out_queue: queue.Queue[str] = queue.Queue()
         self.log_queue: queue.Queue[LogRecord] = queue.Queue()
         self.__running_flag = False
 
-    async def _output(self):
-        while self.__running_flag or (self.__out_queue.qsize() or self.log_queue.qsize()):
-            await asyncio.sleep(0.01)
-            if self.__out_queue.qsize():
-                msg = self.__out_queue.get()
+    def stop(self):
+        self.__running_flag = False
+
+    def run(self):
+        self.__running_flag = True
+        while self.__running_flag or self.out_queue.qsize() or self.log_queue.qsize():
+            time.sleep(0.01)
+            if self.out_queue.qsize():
+                msg = self.out_queue.get()
                 print(msg)
                 # TODO: replace this with prompt_toolkit.print_formatted_text after they fixed PT#1453
             if self.log_queue.qsize():
                 rec = self.log_queue.get()
                 print(rec.msg)
 
-    async def _get_con_input(self):
-        session = PromptSession()
-        while self.__running_flag:
-            with patch_stdout():
-                curr_input = await session.prompt_async('> ')
-                self.in_queue.put(curr_input)
-                for func in self.__input_func_task:
-                    self.__loop.create_task(func(curr_input))
-                for func in self.__input_func_await:
-                    await func(curr_input)
 
-    async def _async_run(self):
-        output_task = self.__loop.create_task(self._output())
-        await self._get_con_input()
-        await output_task
+class Console:
+
+    def __init__(self, bcc: Broadcast):
+        self._out = _OutThread()
+        self._in = _InThread(bcc)
+        self._in.start()
+        self._out.start()
+        self.log_queue = self._out.log_queue
 
     def stop(self):
-        self.__running_flag = False
+        self.output("Press ENTER to exit program.")
+        self._out.stop()
+        self._out.join()
+        self._in.stop()
+        self._in.join()
 
-    def register(self, need_await: bool = False):
-        def decorator(func: Callable[[str], Coroutine]):
-            if need_await:
-                self.__input_func_await.append(func)
-            else:
-                self.__input_func_task.append(func)
+    def input(self) -> str:
+        return self._in.in_queue.get()
 
-        return decorator
-
-    def get_input(self) -> str:
-        return self.in_queue.get()
-
-    def put_output(self, value: str):
-        self.__out_queue.put(value)
-
-    def run(self):
-        self.__running_flag = True
-        self.__loop.run_until_complete(self._async_run())
-
-
-if __name__ == '__main__':
-    con = Console()
-
-
-    @con.register(need_await=True)
-    async def stopper(command: str):
-        if command == '.stop':
-            con.stop()
-        else:
-            con.put_output(command)
-
-    con.start()
-    con.join()
+    def output(self, value: str):
+        self._out.out_queue.put(value)

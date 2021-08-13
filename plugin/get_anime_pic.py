@@ -91,6 +91,15 @@ def main(ctx: lib.XenonContext):
             img_data = await response.read()
             return img_data, "None"
 
+    async def get_dmoe_cc() -> Tuple[bytes, str]:
+        """
+        Doc: https://www.dmoe.cc
+        """
+        async with aiohttp.request("GET",
+                                   "https://www.dmoe.cc/random.php") as response:
+            img_data = await response.read()
+            return img_data, "None"
+
     _api_mapping: Dict[str, Callable[[], Coroutine[Any, Any, Tuple[bytes, str]]]] = {
         "lolicon": get_lolicon,
         "rainchan": get_rainchan,
@@ -98,6 +107,7 @@ def main(ctx: lib.XenonContext):
         "waifu.pics/waifu": get_waifu_pics_waifu,
         "waifu.pics/neko": get_waifu_pics_neko,
         "sola-acg": get_sola_acg,
+        "dmoe.cc": get_dmoe_cc
     }
 
     pref_cursor = None

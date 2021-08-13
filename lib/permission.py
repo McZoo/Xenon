@@ -3,7 +3,7 @@ from typing import Union, Optional
 from aiosqlite import Cursor
 from graia.application import Friend, Member
 
-from . import database, XenonContext
+from . import database
 
 cursor: Optional[Cursor] = None
 
@@ -39,37 +39,10 @@ async def set_perm(user: Union[Friend, Member, int], level: int) -> None:
                          (user, level,))
 
 
-async def open_perm_db(ctx: XenonContext):
+async def open_perm_db():
     global cursor
     cursor = await database.open_db('permission',
                                     "("
                                     "id INTEGER PRIMARY KEY,"
                                     "level INTEGER"
                                     ")")
-
-    @ctx.con.register()
-    async def update_permission(command: str):
-        if command.startswith('.set-perm') and len(command.split(" ")) == 3:
-            _, user, lv = command.split(" ")
-            try:
-                user = int(user)
-                if lv.lower() in _mapping:
-                    lv = _mapping[lv]
-                else:
-                    lv = int(lv)
-            except ValueError as e:
-                ctx.logger.error(f"Unable to cast type: {e.args}")
-            else:
-                ctx.logger.debug(f"Setting user {user}'s permission to {lv}.")
-                await set_perm(user, lv)
-
-    @ctx.con.register()
-    async def query_permission(command: str):
-        if command.startswith('.query-perm') and len(command.split(" ")) == 2:
-            _, user = command.split(" ")
-            try:
-                user = int(user)
-            except ValueError as e:
-                ctx.logger.error(f"Unable to cast type: {e.args}")
-            else:
-                ctx.logger.info(f"User {user}'s permission is {await get_perm(user)}")

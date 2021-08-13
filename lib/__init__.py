@@ -3,7 +3,7 @@ The base file of Xenon library, provides `Version` class as global
 """
 import asyncio
 import dataclasses
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, Any
 
 from graia.application import GraiaMiraiApplication
 from graia.broadcast import Broadcast
@@ -30,6 +30,9 @@ class Version:
         return f'<Version {self.__str__()}>'
 
 
+__version__ = Version(0, 1, 2, "")
+
+
 @dataclasses.dataclass
 class XenonContext:
     con: "console.Console"
@@ -41,8 +44,6 @@ class XenonContext:
 
 
 if not TYPE_CHECKING:  # real importing work
-    from . import path, log, console, config
+    from . import path, log, config
     from . import dependency, plugin, utils, database
-    from . import permission, command
-
-__version__ = Version(0, 1, 1, "")
+    from . import permission, command, console

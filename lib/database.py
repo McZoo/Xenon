@@ -5,6 +5,7 @@ import aiosqlite
 from . import path
 
 db_connections: List[aiosqlite.Connection] = []
+db_cursor: List[aiosqlite.Cursor] = []
 
 
 async def open_db(name: str, declarations: Optional[str] = None) -> aiosqlite.Cursor:
@@ -17,6 +18,7 @@ async def open_db(name: str, declarations: Optional[str] = None) -> aiosqlite.Cu
     curr_conn = await aiosqlite.connect(path.join(path.database, f"{name}.sqlite"), isolation_level=None)
     db_connections.append(curr_conn)
     cursor = await curr_conn.cursor()
+    db_cursor.append(cursor)
     if declarations is not None:
         await cursor.execute(f"CREATE TABLE IF NOT EXISTS {name} {declarations};")
         # use direct replacement because it's a DDL, SQL injection? Leave that to users :P
@@ -24,5 +26,7 @@ async def open_db(name: str, declarations: Optional[str] = None) -> aiosqlite.Cu
 
 
 async def close_all():
+    for cursor in db_cursor:
+        await cursor.close()
     for conn in db_connections:
         await conn.close()

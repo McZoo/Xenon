@@ -19,7 +19,7 @@ class CommandEvent(MiraiEvent):
         GraiaMiraiApplication (annotation): 发布事件的应用实例
     注意：当命令是本地console输入时，msg_chain, user, group 皆为 None
     """
-    type = "InvokeCommand"
+    type = "CommandEvent"
     source: str
     command: str
     perm_lv: int
@@ -50,8 +50,6 @@ def initialize(ctx: XenonContext):
         ctx.bcc.postEvent(CommandEvent("remote", event.messageChain.asDisplay(), await permission.get_perm(user.id),
                                        event.messageChain, user.id, group))
 
-    @ctx.con.register()
-    async def broadcast_command(command: str):
-        ctx.logger.info(f'Posting command "{command}" to broadcast control.')
-        ctx.logger.info("Please wait for response.")
-        ctx.bcc.postEvent(CommandEvent("local", command, permission.ADMIN))
+    @ctx.bcc.receiver(CommandEvent)
+    async def log_command(event: CommandEvent):
+        ctx.logger.debug(f"Received {event.command} from {event.source}")
