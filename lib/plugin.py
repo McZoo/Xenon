@@ -3,7 +3,7 @@ import dataclasses
 import importlib
 import os
 from types import FunctionType
-from typing import List, NamedTuple, cast, Type, Optional
+from typing import List, NamedTuple, cast, Type, Optional, Dict
 
 from . import dependency, config, Version, path, XenonContext
 
@@ -20,14 +20,16 @@ class XenonPluginSpec:
     version: Version
     name: str
     author: str
+    doc_string: str
     cfg: Optional[config.XenonConfigTemplate]
 
-    def __init__(self, version: Version, name: str, author: str,
+    def __init__(self, version: Version, name: str, author: str, doc_string: str,
                  depend: dependency.DependencyEntry = None, config_template: Type[config.XenonConfigTemplate] = None):
         self.depend = depend
         self.config_template = config_template
         self.version = version
         self.author = author
+        self.doc_string = doc_string
         self.name = name
         self.cfg = None
 
@@ -39,9 +41,10 @@ class XenonPluginSpec:
         :return: bool
         """
         if hasattr(instance, 'depend') and hasattr(instance, 'config_template') \
-                and hasattr(instance, 'version') and hasattr(instance, 'name'):
+                and hasattr(instance, 'version') and hasattr(instance, 'name') \
+                and hasattr(instance, 'doc_string') and hasattr(instance, 'author'):
             """
-            here we don't check properties' type to reduce coding work
+            here we don't check properties' type to reduce work and speed up process
             """
             return True
         else:
@@ -91,7 +94,7 @@ class UnloadedXenonPlugin(NamedTuple):
 
 class XenonPluginList:
     ctx: XenonContext
-    loaded: List[XenonPlugin] = []
+    loaded: Dict[str, XenonPlugin] = {}
     unloaded: List[UnloadedXenonPlugin] = []
     broken: List[str] = []  # this is a exception because they are unable to be imported
 
@@ -100,7 +103,7 @@ class XenonPluginList:
         """
             Load plugins from `plugin` directory
             :return: a tuple with list containing loaded plugins, unloaded plugins, and broken plugins
-            """
+        """
         result = cls()
         plugin_name_list = [i.removesuffix('.py') for i in os.listdir(path.plugin) if
                             (not i.endswith('.ignore') and not i.endswith('.disabled')
@@ -116,14 +119,11 @@ class XenonPluginList:
             else:
                 dep_check_passed, unmatched_dependency = dependency.verify_dependency(current_plugin.plugin_spec.depend)
                 if dep_check_passed:
-                    result.loaded.append(current_plugin)
+                    result.loaded[name] = current_plugin
                 else:
                     result.unloaded.append(
                         UnloadedXenonPlugin(current_plugin, unmatched_dependency, name))
         return result
-
-    def set_ctx(self, ctx: XenonContext):
-        self.ctx = ctx
 
     def log_unloaded_plugins(self):
         for i in self.unloaded:
@@ -135,20 +135,20 @@ class XenonPluginList:
             self.ctx.logger.error("\n".join(i.dependency.name))
 
     def load_config(self):
-        require_remove: List[XenonPlugin] = []
-        for plugin in self.loaded:
+        require_remove: List[str] = []
+        for name, plugin in self.loaded.items():
             try:
                 plugin.plugin_spec.load_config()
             except Exception as e:
                 self.ctx.logger.error(f"Plugin {plugin.plugin_spec.name}'s config file is broken:")
                 self.ctx.logger.error(f"{e}: {e.args}")
-                require_remove.append(plugin)
+                require_remove.append(name)
         for i in require_remove:
-            self.loaded.remove(i)
-            self.broken.append(i.plugin_spec.name)
+            broke = self.loaded.pop(i)
+            self.broken.append(broke.name)
 
     def execute_main(self):
-        for plugin in self.loaded:
+        for plugin in self.loaded.values():
             plugin.main(self.ctx)
 
     def prepare(self):

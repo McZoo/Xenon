@@ -10,12 +10,9 @@ if TYPE_CHECKING:
 import lib
 from lib.command import CommandEvent
 
-plugin_spec = lib.plugin.XenonPluginSpec(
-    lib.Version(0, 0, 1),
-    "server_info",
-    "BlueGlassBlock",
-    lib.dependency.DependencyEntry({"mcstatus": "mcstatus"}),
-)
+plugin_spec = lib.plugin.XenonPluginSpec(lib.Version(0, 1, 0), "server_info", "BlueGlassBlock",
+                                         ".server_info HOST：查询 HOST 位置服务器的状态",
+                                         lib.dependency.DependencyEntry({"mcstatus": "mcstatus"}))
 
 
 def main(ctx: lib.XenonContext):

@@ -10,10 +10,10 @@ from lib.permission import (
 )
 
 plugin_spec = lib.plugin.XenonPluginSpec(
-    lib.Version(0, 0, 1),
-    "management",
-    "BlueGlassBlock"
-)
+    lib.Version(0, 1, 0), "management", "BlueGlassBlock",
+    ".stop：停止 Xenon\n"
+    ".set-perm USER_ID PERMISSION：设置USER_ID的权限为PERMISSION\n"
+    ".query-perm USER_ID：查询USER_ID的权限")
 
 _mapping = {"admin": ADMIN, "operator": OPERATOR, "friend": FRIEND, "user": USER, "banned": BANNED, "default": DEFAULT}
 

@@ -10,12 +10,13 @@ from lib.command import CommandEvent
 from graia.application import MessageChain
 from graia.application.message.elements.internal import Plain, Image
 
-plugin_spec = lib.plugin.XenonPluginSpec(
-    lib.Version(0, 0, 1),
-    "get_anime_pic",
-    "BlueGlassBlock",
-    lib.dependency.DependencyEntry({"aiohttp": "aiohttp"}),
-)
+plugin_spec = lib.plugin.XenonPluginSpec(lib.Version(0, 1, 0), "get_anime_pic", "BlueGlassBlock",
+                                         ".get_anime_pic：从用户配置的API获取一张图片\n"
+                                         ".set_anime_api_pref API_PROVIDER：设置用户的API为 API_PROVIDER\n"
+                                         "API PROVIDER的可用值为：\n"
+                                         "{ rainchan, lolicon, pic.re, \n"
+                                         "waifu.pics/waifu, waifu.pics/neko,\n"
+                                         "sola-acg, dmoe.cc }", lib.dependency.DependencyEntry({"aiohttp": "aiohttp"}))
 
 
 def main(ctx: lib.XenonContext):
@@ -117,7 +118,7 @@ def main(ctx: lib.XenonContext):
         nonlocal pref_cursor
         if pref_cursor is None:
             pref_cursor = await lib.database.open_db('get_anime_pic', "(id INTEGER PRIMARY KEY, pref TEXT)")
-        if event.user and event.command == '.get_anime_pic' and event.perm_lv >= lib.permission.FRIEND:
+        if event.user and event.command == '.get_anime_pic' and event.perm_lv >= lib.permission.USER:
             res = await (await pref_cursor.execute("SELECT pref FROM get_anime_pic where id = ?",
                                                    (event.user,))).fetchone()
             if res is None:

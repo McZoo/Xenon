@@ -3,7 +3,7 @@ The base file of Xenon library, provides `Version` class as global
 """
 import asyncio
 import dataclasses
-from typing import TYPE_CHECKING, Dict, Any
+from typing import TYPE_CHECKING
 
 from graia.application import GraiaMiraiApplication
 from graia.broadcast import Broadcast
@@ -21,7 +21,7 @@ class Version:
     major: int = 0
     minor: int = 0
     micro: int = 0
-    serial: str = ""
+    serial: str = "exp"
 
     def __str__(self):
         return f'{self.major}.{self.minor}.{self.micro}-{self.serial}'
@@ -30,7 +30,7 @@ class Version:
         return f'<Version {self.__str__()}>'
 
 
-__version__ = Version(0, 1, 2, "")
+__version__ = Version(0, 2, 0, "exp")  # check before new version rollout
 
 
 @dataclasses.dataclass

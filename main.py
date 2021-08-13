@@ -15,7 +15,7 @@ if __name__ == '__main__':
     app = GraiaMiraiApplication(broadcast=bcc, connect_info=session)
     plugins = lib.plugin.XenonPluginList.load_plugins()
     ctx = lib.XenonContext(con, logger, plugins, loop, app, bcc)
-    plugins.set_ctx(ctx)
+    plugins.ctx = ctx
     lib.command.initialize(ctx)
     loop.run_until_complete(lib.permission.open_perm_db())
     plugins.prepare()
