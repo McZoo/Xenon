@@ -4,23 +4,21 @@ import time
 from logging import LogRecord
 from typing import Callable, List, Coroutine
 
-import graia.application
 from graia.broadcast import Broadcast
-from prompt_toolkit.shortcuts import prompt
 from prompt_toolkit.patch_stdout import patch_stdout
+from prompt_toolkit.shortcuts import prompt
 
 from lib import permission
 from lib.command import CommandEvent
 
 
 class _InThread(threading.Thread):
-    def __init__(self, bcc: Broadcast, logger: graia.application.AbstractLogger):
+    def __init__(self, bcc: Broadcast):
         super().__init__(name='Console_InThread')
         self.in_queue: queue.Queue[str] = queue.Queue()
         self.__input_funcs: List[Callable[[str], Coroutine]] = []
         self.__running_flag = False
         self.bcc = bcc
-        self.logger = logger
 
     def run(self):
         self.__running_flag = True
