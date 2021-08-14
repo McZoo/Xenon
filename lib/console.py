@@ -1,9 +1,11 @@
+import asyncio
 import queue
 import threading
 import time
 from logging import LogRecord
 from typing import Callable, List, Coroutine
 
+from graia.application.event.lifecycle import ApplicationLaunched
 from graia.broadcast import Broadcast
 from prompt_toolkit.patch_stdout import patch_stdout
 from prompt_toolkit.shortcuts import prompt
@@ -14,11 +16,25 @@ from lib.command import CommandEvent
 
 class _InThread(threading.Thread):
     def __init__(self, bcc: Broadcast):
-        super().__init__(name='Console_InThread')
+        super().__init__(name='Console_InThread', daemon=True)
         self.in_queue: queue.Queue[str] = queue.Queue()
         self.__input_funcs: List[Callable[[str], Coroutine]] = []
         self.__running_flag = False
         self.bcc = bcc
+        self.poster_online_time = 0
+
+        @self.bcc.receiver(ApplicationLaunched)
+        async def command_poster():
+            time_stamp = time.time()
+            self.poster_online_time = time_stamp
+            while time_stamp == self.poster_online_time:
+                await asyncio.sleep(0.01)
+                try:
+                    in_str = self.in_queue.get_nowait()
+                except queue.Empty:
+                    pass
+                else:
+                    self.bcc.postEvent(CommandEvent("local", in_str, permission.ADMIN))
 
     def run(self):
         self.__running_flag = True
@@ -26,10 +42,9 @@ class _InThread(threading.Thread):
             with patch_stdout():
                 curr_input = prompt('> ')
             self.in_queue.put(curr_input)
-            if self.bcc.loop.is_running():
-                self.bcc.postEvent(CommandEvent("local", curr_input, permission.ADMIN))
 
     def stop(self):
+        self.poster_online_time = 0
         self.__running_flag = False
 
 

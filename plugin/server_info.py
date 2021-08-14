@@ -1,11 +1,8 @@
 import base64
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from graia.application import MessageChain
 from graia.application.message.elements.internal import Plain, At, Image
-
-if TYPE_CHECKING:
-    import mcstatus
 
 import lib
 from lib.command import CommandEvent
@@ -15,7 +12,7 @@ plugin_spec = lib.plugin.XenonPluginSpec(lib.Version(0, 1, 0), "server_info", "B
                                          lib.dependency.DependencyEntry({"mcstatus": "mcstatus"}))
 
 
-def main(ctx: lib.XenonContext):
+async def main(ctx: lib.XenonContext):
     import mcstatus
 
     @ctx.bcc.receiver(CommandEvent)

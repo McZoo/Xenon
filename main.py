@@ -18,7 +18,7 @@ if __name__ == '__main__':
     plugins.ctx = ctx
     lib.command.initialize(ctx)
     loop.run_until_complete(lib.permission.open_perm_db())
-    plugins.prepare()
+    loop.run_until_complete(plugins.prepare())
     try:
         app.launch_blocking()
     except (asyncio.exceptions.CancelledError, InvaildSession):

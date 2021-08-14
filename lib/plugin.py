@@ -77,9 +77,10 @@ class XenonPlugin(abc.ABC):
         return False
 
     @abc.abstractmethod
-    def main(self, ctx: XenonContext):
+    async def main(self, ctx: XenonContext):
         """
         For every plugin, it will do registration work in this plugin
+        need to be a coroutine function
         :param ctx: Xenon Context
         :return: Nothing.
         """
@@ -147,11 +148,11 @@ class XenonPluginList:
             broke = self.loaded.pop(i)
             self.broken.append(broke.name)
 
-    def execute_main(self):
+    async def execute_main(self):
         for plugin in self.loaded.values():
-            plugin.main(self.ctx)
+            await plugin.main(self.ctx)
 
-    def prepare(self):
+    async def prepare(self):
         self.log_unloaded_plugins()
         self.load_config()
-        self.execute_main()
+        await self.execute_main()

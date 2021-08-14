@@ -1,14 +1,11 @@
 import json
-from typing import TYPE_CHECKING, Tuple, Dict, Callable, Coroutine, Any
-
-if TYPE_CHECKING:
-    import aiohttp
-
-import lib
-from lib.command import CommandEvent
+from typing import Tuple, Dict, Callable, Coroutine, Any
 
 from graia.application import MessageChain
 from graia.application.message.elements.internal import Plain, Image
+
+import lib
+from lib.command import CommandEvent
 
 plugin_spec = lib.plugin.XenonPluginSpec(lib.Version(0, 1, 0), "get_anime_pic", "BlueGlassBlock",
                                          ".get_anime_pic：从用户配置的API获取一张图片\n"
@@ -19,7 +16,7 @@ plugin_spec = lib.plugin.XenonPluginSpec(lib.Version(0, 1, 0), "get_anime_pic", 
                                          "sola-acg, dmoe.cc }", lib.dependency.DependencyEntry({"aiohttp": "aiohttp"}))
 
 
-def main(ctx: lib.XenonContext):
+async def main(ctx: lib.XenonContext):
     import aiohttp
 
     async def get_lolicon() -> Tuple[bytes, str]:
@@ -111,18 +108,15 @@ def main(ctx: lib.XenonContext):
         "dmoe.cc": get_dmoe_cc
     }
 
-    pref_cursor = None
+    pref_cursor = await lib.database.open_db('anime_pic_db', "(id INTEGER PRIMARY KEY, pref TEXT)")
 
     @ctx.bcc.receiver(CommandEvent)
     async def get_anime_pic(event: CommandEvent):
-        nonlocal pref_cursor
-        if pref_cursor is None:
-            pref_cursor = await lib.database.open_db('get_anime_pic', "(id INTEGER PRIMARY KEY, pref TEXT)")
         if event.user and event.command == '.get_anime_pic' and event.perm_lv >= lib.permission.USER:
-            res = await (await pref_cursor.execute("SELECT pref FROM get_anime_pic where id = ?",
+            res = await (await pref_cursor.execute("SELECT pref FROM anime_pic_db where id = ?",
                                                    (event.user,))).fetchone()
             if res is None:
-                await pref_cursor.execute("INSERT INTO get_anime_pic VALUES (?, ?)", (event.user, "rainchan"))
+                await pref_cursor.execute("INSERT INTO anime_pic_db VALUES (?, ?)", (event.user, "rainchan"))
                 pref: str = "rainchan"
             else:
                 pref: str = res[0]
@@ -142,14 +136,11 @@ def main(ctx: lib.XenonContext):
 
     @ctx.bcc.receiver(CommandEvent)
     async def set_anime_api_pref(event: CommandEvent):
-        nonlocal pref_cursor
-        if pref_cursor is None:
-            pref_cursor = await lib.database.open_db('get_anime_pic', "(id INTEGER PRIMARY KEY, pref TEXT)")
         if event.user and event.command.startswith(".set_anime_api_pref") and event.perm_lv >= lib.permission.FRIEND:
             if len(event.command.split(" ")) == 2:
                 _, pref = event.command.split(" ")
                 if pref in _api_mapping:
-                    await pref_cursor.execute("INSERT INTO get_anime_pic VALUES (?, ?) "
+                    await pref_cursor.execute("INSERT INTO anime_pic_db VALUES (?, ?) "
                                               "ON CONFLICT (id) DO UPDATE SET pref = excluded.pref",
                                               (event.user, pref,))
                     reply = MessageChain.create([Plain(f"成功设置API为{pref}")])

@@ -49,7 +49,3 @@ def initialize(ctx: XenonContext):
     async def broadcast_command(event: TempMessage, user: Member, group: Group):
         ctx.bcc.postEvent(CommandEvent("remote", event.messageChain.asDisplay(), await permission.get_perm(user.id),
                                        event.messageChain, user.id, group))
-
-    @ctx.bcc.receiver(CommandEvent)
-    async def log_command(event: CommandEvent):
-        ctx.logger.debug(f"Received {event.command} from {event.source}")

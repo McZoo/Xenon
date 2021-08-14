@@ -9,12 +9,12 @@ plugin_spec = lib.plugin.XenonPluginSpec(lib.Version(0, 1, 0), "about", "BlueGla
                                                                                           ".about： 关于Xenon的信息")
 
 
-def main(ctx: lib.XenonContext):
+async def main(ctx: lib.XenonContext):
     @ctx.bcc.receiver(CommandEvent)
     async def about(event: CommandEvent):
         if event.user and event.perm_lv >= permission.USER and event.command.startswith(".about"):
             reply = (f"Xenon {lib.__version__} by McZoo\n"
-                     f"已加载 {len(ctx.plugins.loaded)}个插件。\n"
+                     f"已加载{len(ctx.plugins.loaded)}个插件。\n"
                      f"有{len(ctx.plugins.unloaded) + len(ctx.plugins.broken)}个插件失效。\n"
                      "需要更多帮助？请使用 .help 命令。")
             if event.group:

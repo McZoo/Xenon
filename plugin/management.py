@@ -18,7 +18,7 @@ plugin_spec = lib.plugin.XenonPluginSpec(
 _mapping = {"admin": ADMIN, "operator": OPERATOR, "friend": FRIEND, "user": USER, "banned": BANNED, "default": DEFAULT}
 
 
-def main(ctx: lib.XenonContext):
+async def main(ctx: lib.XenonContext):
     @ctx.bcc.receiver(CommandEvent)
     async def stopper(event: CommandEvent):
         if event.command == '.stop' and event.perm_lv >= lib.permission.OPERATOR:

@@ -30,7 +30,7 @@ class Version:
         return f'<Version {self.__str__()}>'
 
 
-__version__ = Version(0, 2, 0, "exp")  # check before new version rollout
+__version__ = Version(0, 2, 1, "exp")  # check before new version rollout
 
 
 @dataclasses.dataclass
