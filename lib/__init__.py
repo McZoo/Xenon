@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from graia.application import GraiaMiraiApplication
 from graia.broadcast import Broadcast
+from graia.scheduler import GraiaScheduler
 
 if TYPE_CHECKING:
     # only for type checking because we don't want `Version` class to be used before its declaration in __init__.py
@@ -30,7 +31,7 @@ class Version:
         return f'<Version {self.__str__()}>'
 
 
-__version__ = Version(0, 2, 1, "exp")  # check before new version rollout
+__version__ = Version(0, 2, 2, "exp")  # check before new version rollout
 
 
 @dataclasses.dataclass
@@ -41,6 +42,7 @@ class XenonContext:
     loop: "asyncio.AbstractEventLoop"
     app: "GraiaMiraiApplication"
     bcc: "Broadcast"
+    scheduler: "GraiaScheduler"
 
 
 if not TYPE_CHECKING:  # real importing work
