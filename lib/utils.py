@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Iterable
 
 from graia.application import Session
 from pydantic import AnyHttpUrl
@@ -35,7 +35,7 @@ def get_session(con: console.Console, logger: log.Logger) -> Session:
     return Session(host=cfg.host, authKey=cfg.authKey, account=cfg.account)
 
 
-def crontab_iter(pattern: str, base: Optional[datetime] = None):
+def crontab_iter(pattern: str, base: Optional[datetime] = None) -> Iterable[datetime]:
     """\
     使用类似 crontab 的方式生成计时器
     从graia.scheduler.timer改进而来
