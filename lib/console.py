@@ -3,7 +3,7 @@ import queue
 import threading
 import time
 from logging import LogRecord
-from typing import Callable, List, Coroutine
+from typing import Callable, Coroutine, List
 
 from graia.application.event.lifecycle import ApplicationLaunched
 from graia.broadcast import Broadcast
@@ -16,7 +16,7 @@ from lib.command import CommandEvent
 
 class _InThread(threading.Thread):
     def __init__(self, bcc: Broadcast):
-        super().__init__(name='Console_InThread', daemon=True)
+        super().__init__(name="Console_InThread", daemon=True)
         self.in_queue: queue.Queue[str] = queue.Queue()
         self.__input_funcs: List[Callable[[str], Coroutine]] = []
         self.__running_flag = False
@@ -40,7 +40,7 @@ class _InThread(threading.Thread):
         self.__running_flag = True
         while self.__running_flag:
             with patch_stdout():
-                curr_input = prompt('> ')
+                curr_input = prompt("> ")
             self.in_queue.put(curr_input)
 
     def stop(self):
@@ -50,7 +50,7 @@ class _InThread(threading.Thread):
 
 class _OutThread(threading.Thread):
     def __init__(self):
-        super().__init__(name='Console_OutThread')
+        super().__init__(name="Console_OutThread")
         self.out_queue: queue.Queue[str] = queue.Queue()
         self.log_queue: queue.Queue[LogRecord] = queue.Queue()
         self.__running_flag = False
@@ -65,14 +65,14 @@ class _OutThread(threading.Thread):
             if self.out_queue.qsize():
                 msg = self.out_queue.get()
                 print(msg)
-                # TODO: replace this with prompt_toolkit.print_formatted_text after they fixed PT#1453
+                # TODO: replace this with prompt_toolkit.print_formatted_text
+                #  after they fixed PT#1453
             if self.log_queue.qsize():
                 rec = self.log_queue.get()
                 print(rec.msg)
 
 
 class Console:
-
     def __init__(self, bcc: Broadcast):
         self._out = _OutThread()
         self._in = _InThread(bcc)

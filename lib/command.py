@@ -1,8 +1,8 @@
-from typing import Optional, Literal
+from typing import Literal, Optional
 
-from graia.application import Group, Member, Friend
+from graia.application import Friend, Group, Member
 from graia.application.event import EmptyDispatcher
-from graia.application.event.messages import GroupMessage, FriendMessage, TempMessage
+from graia.application.event.messages import FriendMessage, GroupMessage, TempMessage
 from graia.application.event.mirai import MiraiEvent
 from graia.application.message.chain import MessageChain
 
@@ -19,6 +19,7 @@ class CommandEvent(MiraiEvent):
         GraiaMiraiApplication (annotation): 发布事件的应用实例
     注意：当命令是本地console输入时，msg_chain, user, group 皆为 None
     """
+
     type = "CommandEvent"
     source: str
     command: str
@@ -29,23 +30,60 @@ class CommandEvent(MiraiEvent):
 
     Dispatcher = EmptyDispatcher
 
-    def __init__(self, source: Literal["remote", "local"], command: str, perm_lv: int,
-                 msg_chain: Optional[MessageChain] = None, user: Optional[int] = None, group: Optional[Group] = None):
-        super().__init__(source=source, command=command, perm_lv=perm_lv, msg_chain=msg_chain, user=user, group=group)
+    def __init__(
+        self,
+        source: Literal["remote", "local"],
+        command: str,
+        perm_lv: int,
+        msg_chain: Optional[MessageChain] = None,
+        user: Optional[int] = None,
+        group: Optional[Group] = None,
+    ):
+        super().__init__(
+            source=source,
+            command=command,
+            perm_lv=perm_lv,
+            msg_chain=msg_chain,
+            user=user,
+            group=group,
+        )
 
 
 def initialize(ctx: XenonContext):
     @ctx.bcc.receiver(GroupMessage)
     async def broadcast_command(event: GroupMessage, user: Member, group: Group):
-        ctx.bcc.postEvent(CommandEvent("remote", event.messageChain.asDisplay(), await permission.get_perm(user.id),
-                                       event.messageChain, user.id, group))
+        ctx.bcc.postEvent(
+            CommandEvent(
+                "remote",
+                event.messageChain.asDisplay(),
+                await permission.get_perm(user.id),
+                event.messageChain,
+                user.id,
+                group,
+            )
+        )
 
     @ctx.bcc.receiver(FriendMessage)
     async def broadcast_command(event: FriendMessage, user: Friend):
-        ctx.bcc.postEvent(CommandEvent("remote", event.messageChain.asDisplay(), await permission.get_perm(user.id),
-                                       event.messageChain, user.id))
+        ctx.bcc.postEvent(
+            CommandEvent(
+                "remote",
+                event.messageChain.asDisplay(),
+                await permission.get_perm(user.id),
+                event.messageChain,
+                user.id,
+            )
+        )
 
     @ctx.bcc.receiver(TempMessage)
     async def broadcast_command(event: TempMessage, user: Member, group: Group):
-        ctx.bcc.postEvent(CommandEvent("remote", event.messageChain.asDisplay(), await permission.get_perm(user.id),
-                                       event.messageChain, user.id, group))
+        ctx.bcc.postEvent(
+            CommandEvent(
+                "remote",
+                event.messageChain.asDisplay(),
+                await permission.get_perm(user.id),
+                event.messageChain,
+                user.id,
+                group,
+            )
+        )

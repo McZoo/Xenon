@@ -15,7 +15,9 @@ async def open_db(name: str, declarations: Optional[str] = None) -> aiosqlite.Cu
     :param declarations: the data declaration part of the database. INCLUDING PARENTHESIS
     :return:
     """
-    curr_conn = await aiosqlite.connect(path.join(path.database, f"{name}.sqlite"), isolation_level=None)
+    curr_conn = await aiosqlite.connect(
+        path.join(path.database, f"{name}.sqlite"), isolation_level=None
+    )
     db_connections.append(curr_conn)
     cursor = await curr_conn.cursor()
     db_cursor.append(cursor)
