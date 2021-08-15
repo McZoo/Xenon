@@ -32,6 +32,7 @@ async def main(ctx: lib.XenonContext):
     )
     data_fp = open(path.join(path.plugin, "history_today", "history.json"), "r")
     data = json.load(data_fp)
+    data_fp.close()
 
     @ctx.bcc.receiver(CommandEvent)
     async def configure(event: CommandEvent):

@@ -7,3 +7,4 @@ venv/
 external/*
 log/*
 external/nsfw_detector.py
+plugin/daily_poem/data/*

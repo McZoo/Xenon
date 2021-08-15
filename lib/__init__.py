@@ -44,7 +44,7 @@ class Version:
         return f"<Version {self.__str__()}>"
 
 
-__version__ = Version(minor=2, micro=2)  # check before new version rollout
+__version__ = Version(minor=2, micro=3)  # check before new version rollout
 
 
 @dataclasses.dataclass
