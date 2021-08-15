@@ -17,7 +17,7 @@ plugin_spec = lib.plugin.XenonPluginSpec(lib.Version(0, 1, 0), "history_today", 
 
 async def main(ctx: lib.XenonContext):
     db_cur = await lib.database.open_db("history_today_cfg", "(id INTEGER PRIMARY KEY, state INTEGER)")
-    data_fp = open(path.join(path.plugin, "history_today", "data.json"), "r")
+    data_fp = open(path.join(path.plugin, "history_today", "history.json"), "r")
     data = json.load(data_fp)
 
     @ctx.bcc.receiver(CommandEvent)
