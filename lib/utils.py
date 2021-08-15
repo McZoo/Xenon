@@ -1,10 +1,11 @@
-from typing import Optional, Iterable
+from datetime import datetime
+from typing import Iterable, Optional
 
+from croniter import croniter
 from graia.application import Session
 from pydantic import AnyHttpUrl
-from datetime import datetime
-from . import console, config, log
-from croniter import croniter
+
+from . import config, console, log
 
 
 @config.config
@@ -16,7 +17,7 @@ class SessionConfig:
 
 def get_session(con: console.Console, logger: log.Logger) -> Session:
     try:
-        cfg: SessionConfig = config.parse(SessionConfig, 'session')
+        cfg: SessionConfig = config.parse(SessionConfig, "session")
     except (FileNotFoundError, KeyError):
         logger.error("Unable to load session file from local")
         # read from console
@@ -26,10 +27,10 @@ def get_session(con: console.Console, logger: log.Logger) -> Session:
         cfg = SessionConfig()
         while flag:
             in_str = con.input()
-            in_args = in_str.split(' ')
-            if in_args[0] == '/session' and len(in_args) >= 4:
+            in_args = in_str.split(" ")
+            if in_args[0] == "/session" and len(in_args) >= 4:
                 cfg.host = in_args[1]
-                cfg.authKey = ' '.join(in_args[2:-1])
+                cfg.authKey = " ".join(in_args[2:-1])
                 cfg.account = int(in_args[-1])
                 return Session(host=cfg.host, authKey=cfg.authKey, account=cfg.account)
     return Session(host=cfg.host, authKey=cfg.authKey, account=cfg.account)

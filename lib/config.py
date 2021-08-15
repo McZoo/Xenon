@@ -1,11 +1,14 @@
+"""
+Xenon config module
+"""
+import decimal
 import functools
 import json
 import os.path
 from abc import ABC, abstractmethod
 from functools import partial
 from types import FunctionType
-from typing import Dict, Union, Type, Any, NamedTuple, List, TypeVar, Callable
-import decimal
+from typing import Any, Callable, Dict, List, NamedTuple, Type, TypeVar, Union
 
 import yaml
 
@@ -15,29 +18,47 @@ MISSING = object()
 
 
 class Entry(NamedTuple):
+    """
+    Entry that should take place of default
+    """
+
     value: Any = MISSING
     func: Callable[[Any], Any] = MISSING
 
 
 class ResolveEntry(NamedTuple):
+    """
+    The result of resolving a class's annotations or class variants
+    """
+
     name: str
-    label: Union[Type['XenonConfigTemplate'], Type]
+    label: Union[Type["XenonConfigTemplate"], Type]
     default: Union[Entry, Any] = MISSING
-    subclass: List['ResolveEntry'] = MISSING
+    subclass: List["ResolveEntry"] = MISSING
 
 
-def resolve(cls: Type['XenonConfigTemplate']) -> List[ResolveEntry]:
+def resolve(cls: Type["XenonConfigTemplate"]) -> List[ResolveEntry]:
     """
     Process a "XenonConfigTemplate" class recursively
     """
     if cls.resolve_result_cache__ is None:
-        annotations: Dict[str, Union[type, Type['XenonConfigTemplate']]] = \
-            cls.__annotations__ | {k: v for k, v in vars(cls).items() if not k.startswith('_')
-                                   and not k.endswith('_') and type(v) is type}
-        default = {k: v for k, v in vars(cls).items() if
-                   not k.startswith('_') and not k.endswith('_') and not type(v) is type}
-        subclass = {k: v.resolve_() for k, v in vars(cls).items() if not k.startswith('_')
-                    and not k.endswith('_') and type(v) is type}
+        annotations: Dict[
+            str, Union[type, Type["XenonConfigTemplate"]]
+        ] = cls.__annotations__ | {
+            k: v
+            for k, v in vars(cls).items()
+            if not k.startswith("_") and not k.endswith("_") and type(v) is type
+        }
+        default = {
+            k: v
+            for k, v in vars(cls).items()
+            if not k.startswith("_") and not k.endswith("_") and not type(v) is type
+        }
+        subclass = {
+            k: v.resolve_()
+            for k, v in vars(cls).items()
+            if not k.startswith("_") and not k.endswith("_") and type(v) is type
+        }
         result = list()
         for k, v in annotations.items():
             _default = default[k] if k in default else MISSING
@@ -48,34 +69,54 @@ def resolve(cls: Type['XenonConfigTemplate']) -> List[ResolveEntry]:
 
 
 class XenonConfigTemplate(ABC):
+    """
+    The abstract base class of Xenon config templates.
+    """
+
     __annotations__: Dict[str, Type]
     resolve_result_cache__: Union[List[ResolveEntry], None]
 
     @classmethod
     @abstractmethod
     def resolve_(cls) -> List[ResolveEntry]:
+        """
+        Recursively resolve a config template.
+        :return: A list of ResolveEntry
+        """
         pass
 
 
 T_Config = TypeVar("T_Config", XenonConfigTemplate, object)
 
 
-def parse_from_dict(cls: Type[T_Config], content: Dict[str, Any]):
+def parse_from_dict(cls: Type[T_Config], content: Dict[str, Any]) -> T_Config:
+    """
+    return a configured config instance from provided dictionary
+    :param cls: config class
+    :param content: a dict parsed from yaml or json file
+    :return: the instance of cls
+    """
     resolve_result: List[ResolveEntry] = cls.resolve_()
     new_instance: XenonConfigTemplate = cls()
     for entry in resolve_result:
         if entry.subclass is not MISSING:
-            if entry.name in content:  # let entry.name missing situation bypass to next if statement
-                setattr(new_instance, entry.name, parse_from_dict(entry.label, content[entry.name]))
+            if (
+                entry.name in content
+            ):  # let entry.name missing situation bypass to next if statement
+                setattr(
+                    new_instance,
+                    entry.name,
+                    parse_from_dict(entry.label, content[entry.name]),
+                )
         if entry.name not in content:
             if entry.default is MISSING:
                 if entry.subclass is MISSING:
-                    raise KeyError(f'Missing necessary key: {entry.name}')
+                    raise KeyError(f"Missing necessary key: {entry.name}")
                 else:  # entry is a subclass
                     try:
                         replacement = parse_from_dict(entry.label, {})
                     except KeyError:
-                        raise KeyError(f'Missing necessary key: {entry.name}')
+                        raise KeyError(f"Missing necessary key: {entry.name}")
                     else:  # this subclass could be ignored safely
                         setattr(new_instance, entry.name, replacement)
             else:
@@ -83,7 +124,7 @@ def parse_from_dict(cls: Type[T_Config], content: Dict[str, Any]):
                     setattr(new_instance, entry.name, entry.default)
                 else:
                     if entry.default.value is MISSING:
-                        raise KeyError(f'Missing necessary key: {entry.name}')
+                        raise KeyError(f"Missing necessary key: {entry.name}")
                     else:
                         setattr(new_instance, entry.name, entry.default.value)
         else:
@@ -91,7 +132,11 @@ def parse_from_dict(cls: Type[T_Config], content: Dict[str, Any]):
                 setattr(new_instance, entry.name, content[entry.name])
             else:
                 if isinstance(entry.default.func, FunctionType):
-                    setattr(new_instance, entry.name, entry.default.func(content[entry.name]))
+                    setattr(
+                        new_instance,
+                        entry.name,
+                        entry.default.func(content[entry.name]),
+                    )
                 else:
                     setattr(new_instance, entry.name, content[entry.name])
     return new_instance
@@ -108,20 +153,20 @@ def parse(cls: Type[T_Config], name: str) -> T_Config:
     if cls is None:
         return None
     filepath_no_prefix = os.path.abspath(os.path.join(path.config, name))
-    if os.path.isfile(filepath_no_prefix + '.yaml'):
-        filename = filepath_no_prefix + '.yaml'
+    if os.path.isfile(filepath_no_prefix + ".yaml"):
+        filename = filepath_no_prefix + ".yaml"
         loader = partial(yaml.load, Loader=yaml.loader.FullLoader)
-    elif os.path.isfile(filepath_no_prefix + '.yml'):
-        filename = filepath_no_prefix + '.yml'
+    elif os.path.isfile(filepath_no_prefix + ".yml"):
+        filename = filepath_no_prefix + ".yml"
         loader = partial(yaml.load, Loader=yaml.loader.FullLoader)
-    elif os.path.isfile(filepath_no_prefix + '.json'):
-        filename = filepath_no_prefix + '.json'
+    elif os.path.isfile(filepath_no_prefix + ".json"):
+        filename = filepath_no_prefix + ".json"
         loader = partial(json.load)
     else:
         raise FileNotFoundError("Couldn't find a proper config file")
     filename: str
     parser: Union[json, yaml]
-    with open(filename, 'r', encoding="utf-8") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         content = loader(file)
     return parse_from_dict(cls, content)
 
@@ -140,18 +185,27 @@ def config(cls: type, /):
     return cls
 
 
-def bool_converter(value):
+def bool_converter(value) -> bool:
+    """
+    A convenient converter to boolean type
+    :param value: values that can be casted to bool, like "yes" "no" "true", etc.
+    :return: bool
+    """
     if type(value) is str:
         value: str
         if value.lower() in ("yes", "true", "ok"):
             return True
         elif value.lower() in ("no", "false"):
             return False
-        else:
-            return value
+    return bool(value)
 
 
-def decimal_converter(value):
+def decimal_converter(value) -> decimal.Decimal:
+    """
+    A convenient converter to decimal.Decimal
+    :param value: convertible values
+    :return: decimal.Decimal or the original value
+    """
     if type(value) in (str, float, int):
         try:
             return decimal.Decimal(str(value))

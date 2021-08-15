@@ -4,9 +4,10 @@ from graia.application import GraiaMiraiApplication
 from graia.application.exceptions import InvaildSession
 from graia.broadcast import Broadcast
 from graia.scheduler import GraiaScheduler
+
 import lib
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     loop = asyncio.new_event_loop()
     bcc = Broadcast(loop=loop)
     con = lib.console.Console(bcc)
