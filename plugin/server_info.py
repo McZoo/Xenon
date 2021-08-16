@@ -1,5 +1,5 @@
 import base64
-from typing import Optional
+from typing import Optional, List
 
 from graia.application import MessageChain
 from graia.application.message.elements.internal import At, Image, Plain
@@ -30,7 +30,7 @@ async def main(ctx: lib.XenonContext):
                     server = mcstatus.MinecraftServer.lookup(args[1])
                     stat = await server.async_status()
                     players: Optional[
-                        list[mcstatus.server.PingResponse.Players.Player]
+                        List[mcstatus.server.PingResponse.Players.Player]
                     ] = stat.players.sample
                     await ctx.app.sendGroupMessage(
                         group=event.group,
