@@ -1,4 +1,5 @@
 pydantic
+prompt-toolkit
 PyYAML
 graia-application-mirai==0.19.2
 graia-broadcast==0.8.11

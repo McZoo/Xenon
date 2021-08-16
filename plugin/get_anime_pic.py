@@ -35,12 +35,11 @@ async def main(ctx: lib.XenonContext):
             data = json.loads(json_str)
         if data["error"]:
             raise Exception(data["error"])
-        else:
-            data: dict = data["data"][0]
-            async with aiohttp.request("GET", data["urls"]["regular"]) as img_resp:
-                img_data = await img_resp.read()
-                pid = str(data["pid"])
-                return img_data, pid
+        data: dict = data["data"][0]
+        async with aiohttp.request("GET", data["urls"]["regular"]) as img_resp:
+            img_data = await img_resp.read()
+            pid = str(data["pid"])
+            return img_data, pid
 
     async def get_rainchan() -> Tuple[bytes, str]:
         """

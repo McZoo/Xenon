@@ -56,12 +56,9 @@ class XenonPluginSpec:
             and hasattr(instance, "doc_string")
             and hasattr(instance, "author")
         ):
-            """
-            here we don't check properties' type to reduce work and speed up process
-            """
+            # here we don't check properties' type to reduce work and speed up process
             return True
-        else:
-            return False
+        return False
 
     def load_config(self):
         self.cfg = config.parse(self.config_template, self.name)
@@ -100,7 +97,6 @@ class XenonPlugin(abc.ABC):
         :param ctx: Xenon Context
         :return: Nothing.
         """
-        pass
 
 
 class UnloadedXenonPlugin(NamedTuple):

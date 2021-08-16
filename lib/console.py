@@ -65,8 +65,7 @@ class _OutThread(threading.Thread):
             if self.out_queue.qsize():
                 msg = self.out_queue.get()
                 print(msg)
-                # TODO: replace this with prompt_toolkit.print_formatted_text
-                #  after they fixed PT#1453
+                #  Keep an eye on PT#1453
             if self.log_queue.qsize():
                 rec = self.log_queue.get()
                 print(rec.msg)
