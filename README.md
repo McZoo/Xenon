@@ -2,6 +2,13 @@
 一个优雅，用户友好的，基于 [Mirai](https://github.com/mamoe/mirai) 与
 [Graia Project](https://github.com/GraiaProject/) 的 QQ 机器人应用。
 
+![License](https://img.shields.io/badge/license-AGPL--v3-green)
+![Python Implementation](https://img.shields.io/badge/implementation-cpython-informational)
+![Python Version](https://img.shields.io/badge/python-3.9-informational)
+![Code Style](https://img.shields.io/badge/code%20style-black-black)
+![Version](https://img.shields.io/badge/version-0.2.3--exp-brightgreen)
+[![CodeFactor](https://www.codefactor.io/repository/github/mczoo/xenon/badge)](https://www.codefactor.io/repository/github/mczoo/xenon)
+
 ## 许可证
 Xenon 在与 [Mirai](https://github.com/mamoe/mirai) 和
 [Graia Application](https://github.com/GraiaProject/Application) 相同的

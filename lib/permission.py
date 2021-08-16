@@ -35,8 +35,7 @@ async def get_perm(user: Union[Friend, Member, int]) -> int:
     if res is None:
         await cursor.execute("INSERT INTO permission VALUES (?, ?)", (user, DEFAULT))
         return DEFAULT
-    else:
-        return res[0]
+    return res[0]
 
 
 async def set_perm(user: Union[Friend, Member, int], level: int) -> None:
