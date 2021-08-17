@@ -13,7 +13,7 @@ from lib import path
 from lib.command import CommandEvent
 
 plugin_spec = lib.plugin.XenonPluginSpec(
-    lib.Version(0, 1, 0),
+    lib.Version(1, 0, 0),
     "daily_poem",
     "BlueGlassBlock",
     "自动推送”每日诗词“至已注册的群\n"
@@ -98,5 +98,5 @@ async def main(ctx: lib.XenonContext):
         groups = [i[0] for i in groups]
         today_poem = choice(data)
         for group in groups:
-            msg = f"{today_poem[2]} - {today_poem[0]}：{today_poem[1]}\n{today_poem[3]}"
+            msg = f"{today_poem[2]}——{today_poem[0]}：{today_poem[1]}\n{today_poem[3]}"
             await ctx.app.sendGroupMessage(group, MessageChain.create([Plain(msg)]))
