@@ -21,6 +21,7 @@ class LogManager(logging.Formatter, logging.Filter):
         validate=True,
     ):
         logging.Formatter.__init__(self, fmt, date_fmt, style, validate)
+        logging.Filter.__init__(self)
         self.filter_level = level
 
     def filter(self, record: logging.LogRecord) -> bool:

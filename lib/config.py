@@ -37,6 +37,18 @@ class ResolveEntry(NamedTuple):
     subclass: List["ResolveEntry"] = MISSING
 
 
+def _create(annotations, default, subclass):
+    """
+    Create a list of ResolveEntry from given dicts
+    """
+    result = list()
+    for k, v in annotations.items():
+        _default = default[k] if k in default else MISSING
+        _subclass = subclass[k] if k in subclass else MISSING
+        result.append(ResolveEntry(k, v, _default, _subclass))
+    return result
+
+
 def resolve(cls: Type["XenonConfigTemplate"]) -> List[ResolveEntry]:
     """
     Process a "XenonConfigTemplate" class recursively
@@ -59,12 +71,7 @@ def resolve(cls: Type["XenonConfigTemplate"]) -> List[ResolveEntry]:
             for k, v in vars(cls).items()
             if not k.startswith("_") and not k.endswith("_") and type(v) is type
         }
-        result = list()
-        for k, v in annotations.items():
-            _default = default[k] if k in default else MISSING
-            _subclass = subclass[k] if k in subclass else MISSING
-            result.append(ResolveEntry(k, v, _default, _subclass))
-        cls.resolve_result_cache__ = result
+        cls.resolve_result_cache__ = _create(annotations, default, subclass)
     return cls.resolve_result_cache__
 
 
@@ -115,7 +122,7 @@ def parse_from_dict(cls: Type[T_Config], content: Dict[str, Any]) -> T_Config:
                     try:
                         replacement = parse_from_dict(entry.label, {})
                     except KeyError:
-                        raise KeyError(f"Missing necessary key: {entry.name}")
+                        raise
                     else:  # this subclass could be ignored safely
                         setattr(new_instance, entry.name, replacement)
             else:
@@ -163,7 +170,6 @@ def parse(cls: Type[T_Config], name: str) -> T_Config:
     else:
         raise FileNotFoundError("Couldn't find a proper config file")
     filename: str
-    parser: Union[json, yaml]
     with open(filename, "r", encoding="utf-8") as file:
         content = loader(file)
     return parse_from_dict(cls, content)

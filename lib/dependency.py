@@ -22,7 +22,7 @@ class DependencyEntry:
         """
         self.names = list(iter(name_to_pypi.keys()))
         self.pypi_list = list(iter(name_to_pypi.values()))
-        self.resolvable = False if None in self.pypi_list else True
+        self.resolvable = not bool(None in self.pypi_list)
         self.name_to_pypi = name_to_pypi
 
 

@@ -141,7 +141,22 @@ disable=print-statement,
         comprehension-escape,
         no-else-return,
         no-else-raise,
-        unidiomatic-typecheck
+        unidiomatic-typecheck,
+        broad-except,
+        missing-function-docstring,
+        missing-module-docstring,
+        missing-class-docstring,
+        invalid-name,
+        too-many-arguments,
+        too-few-public-methods,
+        import-outside-toplevel,
+        function-redefined,
+        too-many-boolean-expressions,
+        too-many-branches,
+        too-many-statements,
+
+
+
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

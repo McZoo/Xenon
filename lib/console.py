@@ -3,7 +3,6 @@ import queue
 import threading
 import time
 from logging import LogRecord
-from typing import Callable, Coroutine, List
 
 from graia.application.event.lifecycle import ApplicationLaunched
 from graia.broadcast import Broadcast
@@ -18,7 +17,6 @@ class _InThread(threading.Thread):
     def __init__(self, bcc: Broadcast):
         super().__init__(name="Console_InThread", daemon=True)
         self.in_queue: queue.Queue[str] = queue.Queue()
-        self.__input_funcs: List[Callable[[str], Coroutine]] = []
         self.__running_flag = False
         self.bcc = bcc
         self.poster_online_time = 0
