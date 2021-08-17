@@ -83,7 +83,6 @@ class XenonConfigTemplate(ABC):
         Recursively resolve a config template.
         :return: A list of ResolveEntry
         """
-        pass
 
 
 T_Config = TypeVar("T_Config", XenonConfigTemplate, object)
@@ -125,8 +124,7 @@ def parse_from_dict(cls: Type[T_Config], content: Dict[str, Any]) -> T_Config:
                 else:
                     if entry.default.value is MISSING:
                         raise KeyError(f"Missing necessary key: {entry.name}")
-                    else:
-                        setattr(new_instance, entry.name, entry.default.value)
+                    setattr(new_instance, entry.name, entry.default.value)
         else:
             if type(entry.default) is not Entry:
                 setattr(new_instance, entry.name, content[entry.name])
@@ -171,7 +169,7 @@ def parse(cls: Type[T_Config], name: str) -> T_Config:
     return parse_from_dict(cls, content)
 
 
-def config(cls: type, /):
+def config(cls: type):
     """
     @decorator recursively add `resolve_` method to a class to make it a `XenonConfigTemplate`
     :param cls: class
@@ -191,7 +189,7 @@ def bool_converter(value) -> bool:
     :param value: values that can be casted to bool, like "yes" "no" "true", etc.
     :return: bool
     """
-    if type(value) is str:
+    if isinstance(value, str):
         value: str
         if value.lower() in ("yes", "true", "ok"):
             return True
@@ -206,10 +204,9 @@ def decimal_converter(value) -> decimal.Decimal:
     :param value: convertible values
     :return: decimal.Decimal or the original value
     """
-    if type(value) in (str, float, int):
+    if isinstance(value, (str, float, int)):
         try:
             return decimal.Decimal(str(value))
         except decimal.InvalidOperation:
-            return value
-    else:
-        return value
+            pass
+    return value

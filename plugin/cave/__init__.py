@@ -37,9 +37,9 @@ async def main(ctx: lib.XenonContext):
     @ctx.bcc.receiver(CommandEvent)
     async def cave(event: CommandEvent):
         if (
-            event.command == ".cave"
-            and event.perm_lv >= permission.USER
-            and event.group
+                event.command == ".cave"
+                and event.perm_lv >= permission.USER
+                and event.group
         ):
             entry = await (
                 await db_cur.execute(
@@ -54,9 +54,9 @@ async def main(ctx: lib.XenonContext):
     @ctx.bcc.receiver(CommandEvent)
     async def cave_mgmt(event: CommandEvent):
         if (
-            event.command.startswith(".cave-")
-            and event.group
-            and event.perm_lv >= permission.FRIEND
+                event.command.startswith(".cave-")
+                and event.group
+                and event.perm_lv >= permission.FRIEND
         ):
             cmd = event.command.removeprefix(".cave-")
             if cmd.startswith("a "):
@@ -72,7 +72,7 @@ async def main(ctx: lib.XenonContext):
                 chain = event.msg_chain.asSendable().asMerged()
                 await db_cur.execute(
                     "INSERT INTO cave VALUES (?, ?, ?)",
-                    (msg_id, member.name, await to_text(chain[(0, len(".cave-a ")) :])),
+                    (msg_id, member.name, await to_text(chain[(0, len(".cave-a ")):])),
                 )
                 reply = MessageChain.create([Plain(f"成功添加，ID为{msg_id}")])
             elif cmd.startswith("d "):
