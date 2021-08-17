@@ -8,7 +8,7 @@ import lib
 from lib.command import CommandEvent
 
 plugin_spec = lib.plugin.XenonPluginSpec(
-    lib.Version(0, 1, 0),
+    lib.Version(1, 0, 0),
     "server_info",
     "BlueGlassBlock",
     ".server_info HOST：查询 HOST 位置服务器的状态",

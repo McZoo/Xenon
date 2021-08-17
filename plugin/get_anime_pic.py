@@ -8,7 +8,7 @@ import lib
 from lib.command import CommandEvent
 
 plugin_spec = lib.plugin.XenonPluginSpec(
-    lib.Version(0, 1, 0),
+    lib.Version(1, 0, 0),
     "get_anime_pic",
     "BlueGlassBlock",
     ".get_anime_pic：从用户配置的API获取一张图片\n"

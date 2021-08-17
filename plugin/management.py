@@ -17,7 +17,7 @@ from lib.permission import (
 )
 
 plugin_spec = lib.plugin.XenonPluginSpec(
-    lib.Version(0, 1, 0),
+    lib.Version(1, 0, 0),
     "management",
     "BlueGlassBlock",
     ".stop：停止 Xenon\n"

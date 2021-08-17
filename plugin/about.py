@@ -6,7 +6,7 @@ from lib import permission
 from lib.command import CommandEvent
 
 plugin_spec = lib.plugin.XenonPluginSpec(
-    lib.Version(0, 1, 0),
+    lib.Version(1, 0, 0),
     "about",
     "BlueGlassBlock",
     ".help： Xenon 的帮助菜单\n" ".about： 关于Xenon的信息",
