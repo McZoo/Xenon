@@ -55,7 +55,7 @@ async def main(ctx: lib.XenonContext):
                     "Xenon 帮助： ",
                     f"{name} by {spec.author}",
                     f"版本：{spec.version}",
-                    f"依赖项：{spec.depend.names}",
+                    f"依赖项：{spec.depend.names}" if spec.depend else None,
                     spec.doc_string,
                 ]
             else:

@@ -6,7 +6,7 @@
 ![Python Implementation](https://img.shields.io/badge/implementation-cpython-informational)
 ![Python Version](https://img.shields.io/badge/python-3.9-informational)
 ![Code Style](https://img.shields.io/badge/code%20style-black-black)
-![Version](https://img.shields.io/badge/version-0.2.3--exp-brightgreen)
+![Version](https://img.shields.io/badge/version-0.2.5--exp-brightgreen)
 [![CodeFactor](https://www.codefactor.io/repository/github/mczoo/xenon/badge)](https://www.codefactor.io/repository/github/mczoo/xenon)
 
 ## 许可证
