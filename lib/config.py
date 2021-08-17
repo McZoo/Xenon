@@ -121,8 +121,8 @@ def parse_from_dict(cls: Type[T_Config], content: Dict[str, Any]) -> T_Config:
                 else:  # entry is a subclass
                     try:
                         replacement = parse_from_dict(entry.label, {})
-                    except KeyError:
-                        raise
+                    except KeyError as e:
+                        raise KeyError from e
                     else:  # this subclass could be ignored safely
                         setattr(new_instance, entry.name, replacement)
             else:
