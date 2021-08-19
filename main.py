@@ -1,3 +1,4 @@
+# coding=utf-8
 import asyncio
 
 from graia.application import GraiaMiraiApplication
@@ -9,17 +10,18 @@ import lib
 
 if __name__ == "__main__":
     con = lib.console.Console()
+    con.start()
     logger = lib.log.create_logger(con)
     session = lib.utils.get_session(con, logger)
     while lib.state != "STOP":  # Lazarus
         lib.state = "RUN"
         loop = asyncio.new_event_loop()
         bcc = Broadcast(loop=loop)
-        con.set_bcc(bcc)
         scheduler = GraiaScheduler(loop, bcc)
         app = GraiaMiraiApplication(broadcast=bcc, connect_info=session)
         plugins = lib.plugin.XenonPluginList.load_plugins()
         ctx = lib.XenonContext(con, logger, plugins, loop, app, bcc, scheduler)
+        con.set_ctx(ctx)
         plugins.ctx = ctx
         lib.command.initialize(ctx)
         loop.run_until_complete(lib.permission.open_perm_db())

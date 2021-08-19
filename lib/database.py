@@ -1,3 +1,4 @@
+# coding=utf-8
 from typing import List, Optional
 
 import aiosqlite
@@ -34,4 +35,4 @@ async def close_all():
     for conn in db_connections:
         await conn.close()
     db_cursor = []
-    cb_connections = []
+    db_connections = []

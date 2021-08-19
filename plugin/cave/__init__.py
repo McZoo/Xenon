@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Xenon
 回声洞
@@ -36,30 +37,20 @@ async def main(ctx: lib.XenonContext):
 
     @ctx.bcc.receiver(CommandEvent)
     async def cave(event: CommandEvent):
-        if (
-            event.command == ".cave"
-            and event.perm_lv >= permission.USER
-            and event.group
-        ):
+        if event.command == ".cave" and event.perm_lv >= permission.USER:
             entry = await (
                 await db_cur.execute(
                     "SELECT * FROM cave ORDER BY RANDOM() DESC LIMIT 1"
                 )
             ).fetchone()
             msg = f"回声洞 #{entry[0]} by {entry[1]}\n"
-            await ctx.app.sendGroupMessage(
-                event.group, await to_list(entry[2], [Plain(msg)])
-            )
+            await event.send_result(ctx, await to_list(entry[2], [Plain(msg)]))
 
     @ctx.bcc.receiver(CommandEvent)
     async def cave_mgmt(event: CommandEvent):
-        if (
-            event.command.startswith(".cave-")
-            and event.group
-            and event.perm_lv >= permission.FRIEND
-        ):
+        if event.command.startswith(".cave-") and event.perm_lv >= permission.FRIEND:
             cmd = event.command.removeprefix(".cave-")
-            if cmd.startswith("a "):
+            if cmd.startswith("a ") and event.group:
                 member: Member = await ctx.app.getMember(event.group, event.user)
                 msg_id = (
                     await (
@@ -72,7 +63,11 @@ async def main(ctx: lib.XenonContext):
                 chain = event.msg_chain.asSendable().asMerged()
                 await db_cur.execute(
                     "INSERT INTO cave VALUES (?, ?, ?)",
-                    (msg_id, member.name, await to_text(chain[(0, len(".cave-a ")) :])),
+                    (
+                        msg_id,
+                        member.name,
+                        await to_text(chain[(0, len(".cave-a ")) :]),
+                    ),
                 )
                 reply = MessageChain.create([Plain(f"成功添加，ID为{msg_id}")])
             elif cmd.startswith("d "):
@@ -111,4 +106,4 @@ async def main(ctx: lib.XenonContext):
                 reply = MessageChain.create([Plain(f"Xenon 回声洞：\n共有{cnt[0]}条记录")])
             else:
                 reply = "命令无效"
-            await ctx.app.sendGroupMessage(event.group, reply)
+            await event.send_result(ctx, reply)

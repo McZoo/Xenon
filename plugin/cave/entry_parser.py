@@ -1,3 +1,4 @@
+# coding=utf-8
 import base64
 import re
 from typing import List

@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 每天推送一首古诗词
 数据：https://github.com/michaelliao/shici/tree/master/web/src/main/resources/text
@@ -83,8 +84,8 @@ async def main(ctx: lib.XenonContext):
                 reply = f"\n本群的每日诗词启用状态：{bool(cfg)}"
             else:
                 reply = "命令不存在！"
-            await ctx.app.sendGroupMessage(
-                event.group, MessageChain.create([At(event.user), Plain(reply)])
+            await event.send_result(
+                ctx, MessageChain.create([At(event.user), Plain(reply)])
             )
 
     @ctx.scheduler.schedule(lib.utils.crontab_iter("15 6 * * *"))

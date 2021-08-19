@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 The base file of Xenon library, provides `Version` class as global
 """

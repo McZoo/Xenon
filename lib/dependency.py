@@ -1,3 +1,4 @@
+# coding=utf-8
 import dataclasses
 from importlib.util import find_spec
 from typing import List, Mapping, NamedTuple, Tuple, Union

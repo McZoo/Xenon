@@ -1,8 +1,9 @@
+# coding=utf-8
 import abc
 import dataclasses
 import importlib
 import os
-from types import FunctionType
+from types import FunctionType, ModuleType
 from typing import Dict, List, NamedTuple, Optional, Type, cast
 
 from . import Version, XenonContext, config, dependency, path
@@ -130,9 +131,9 @@ class XenonPluginList:
         for name in plugin_name_list:
             import_path = "".join(("plugin.", name))
             try:
-                current_plugin: XenonPlugin = cast(
-                    XenonPlugin, importlib.import_module(import_path)
-                )
+                current_plugin: ModuleType = importlib.import_module(import_path)
+                importlib.reload(current_plugin)
+                current_plugin: XenonPlugin = cast(XenonPlugin, current_plugin)
                 if not XenonPlugin.is_plugin(current_plugin):
                     raise ImportError("The module is not Xenon Plugin")
             except ImportError:

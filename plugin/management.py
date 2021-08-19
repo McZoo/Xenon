@@ -1,5 +1,6 @@
+# coding=utf-8
 from graia.application import MessageChain
-from graia.application.message.elements.internal import At, Plain
+from graia.application.message.elements.internal import Plain
 
 import lib
 from lib.command import CommandEvent
@@ -39,41 +40,20 @@ async def main(ctx: lib.XenonContext):
     async def stopper(event: CommandEvent):
         if event.command == ".stop" and event.perm_lv >= lib.permission.OPERATOR:
             ctx.logger.info("Stopping Xenon...")
-            if event.group:
-                await ctx.app.sendGroupMessage(
-                    group=event.group,
-                    message=MessageChain.create(
-                        [At(event.user), Plain("\n"), Plain("已停止Xenon。")]
-                    ),
-                )
-            elif event.user:
-                await ctx.app.sendFriendMessage(
-                    event.user, MessageChain.create([Plain("已停止Xenon。")])
-                )
+            await event.send_result(ctx, MessageChain.create([Plain("已停止Xenon。")]))
             lib.state = "STOP"
             await ctx.app.shutdown()
         elif event.command == ".reboot" and event.perm_lv >= lib.permission.OPERATOR:
-            ctx.logger.info("Rebooting Xenon...")
-            if event.group:
-                await ctx.app.sendGroupMessage(
-                    group=event.group,
-                    message=MessageChain.create(
-                        [At(event.user), Plain("\n"), Plain("正在重启Xenon。")]
-                    ),
-                )
-            elif event.user:
-                await ctx.app.sendFriendMessage(
-                    event.user, MessageChain.create([Plain("正在重启Xenon。")])
-                )
+            await event.send_result(ctx, MessageChain.create([Plain("正在重启Xenon。")]))
             lib.state = "REBOOT"
             await ctx.app.shutdown()
 
     @ctx.bcc.receiver(CommandEvent)
     async def update_permission(event: CommandEvent):
         if (
-                event.command.startswith(".set-perm")
-                and len(event.command.split(" ")) == 3
-                and event.perm_lv >= OPERATOR
+            event.command.startswith(".set-perm")
+            and len(event.command.split(" ")) == 3
+            and event.perm_lv >= OPERATOR
         ):
             _, user, lv = event.command.split(" ")
             try:
@@ -87,24 +67,14 @@ async def main(ctx: lib.XenonContext):
             else:
                 reply = f"设置用户 {user} 的权限为 {lv} 。"
                 await set_perm(user, lv)
-            if event.group:
-                await ctx.app.sendGroupMessage(
-                    group=event.group,
-                    message=MessageChain.create(
-                        [At(event.user), Plain("\n"), Plain(reply)]
-                    ),
-                )
-            elif event.user:
-                await ctx.app.sendFriendMessage(
-                    event.user, MessageChain.create([Plain(reply)])
-                )
+            await event.send_result(ctx, MessageChain.create([Plain(reply)]))
 
     @ctx.bcc.receiver(CommandEvent)
     async def query_permission(event: CommandEvent):
         if (
-                event.command.startswith(".query-perm")
-                and len(event.command.split(" ")) == 2
-                and event.perm_lv >= OPERATOR
+            event.command.startswith(".query-perm")
+            and len(event.command.split(" ")) == 2
+            and event.perm_lv >= OPERATOR
         ):
             _, user = event.command.split(" ")
             try:
@@ -113,14 +83,4 @@ async def main(ctx: lib.XenonContext):
                 reply = f"无法识别参数: {e.args}"
             else:
                 reply = f"用户 {user} 的权限为 {await get_perm(user)} 。"
-            if event.group:
-                await ctx.app.sendGroupMessage(
-                    group=event.group,
-                    message=MessageChain.create(
-                        [At(event.user), Plain("\n"), Plain(reply)]
-                    ),
-                )
-            elif event.user:
-                await ctx.app.sendFriendMessage(
-                    event.user, MessageChain.create([Plain(reply)])
-                )
+            await event.send_result(ctx, MessageChain.create([Plain(reply)]))

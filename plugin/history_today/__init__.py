@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 history of today plugin
 """
@@ -83,8 +84,8 @@ async def main(ctx: lib.XenonContext):
                 reply = f"\n本群的历史上的今天启用状态：{bool(cfg)}"
             else:
                 reply = "命令不存在！"
-            await ctx.app.sendGroupMessage(
-                event.group, MessageChain.create([At(event.user), Plain(reply)])
+            await event.send_result(
+                ctx, MessageChain.create([At(event.user), Plain(reply)])
             )
 
     @ctx.scheduler.schedule(lib.utils.crontab_iter("30 6 * * *"))
