@@ -1,7 +1,6 @@
-import time
-
+# coding=utf-8
 from graia.application import MessageChain
-from graia.application.message.elements.internal import At, Plain
+from graia.application.message.elements.internal import Plain
 
 import lib
 from lib.command import CommandEvent
@@ -20,7 +19,8 @@ plugin_spec = lib.plugin.XenonPluginSpec(
     lib.Version(1, 0, 0),
     "management",
     "BlueGlassBlock",
-    ".stop：停止 Xenon\n"
+    ".stop：完全停止 Xenon\n"
+    ".reboot：尝试重启 Xenon\n"
     ".set-perm USER_ID PERMISSION：设置USER_ID的权限为PERMISSION\n"
     ".query-perm USER_ID：查询USER_ID的权限",
 )
@@ -39,19 +39,13 @@ async def main(ctx: lib.XenonContext):
     @ctx.bcc.receiver(CommandEvent)
     async def stopper(event: CommandEvent):
         if event.command == ".stop" and event.perm_lv >= lib.permission.OPERATOR:
-            ctx.logger.info(time.asctime())
             ctx.logger.info("Stopping Xenon...")
-            if event.group:
-                await ctx.app.sendGroupMessage(
-                    group=event.group,
-                    message=MessageChain.create(
-                        [At(event.user), Plain("\n"), Plain("已停止Xenon。")]
-                    ),
-                )
-            elif event.user:
-                await ctx.app.sendFriendMessage(
-                    event.user, MessageChain.create([Plain("已停止Xenon。")])
-                )
+            await event.send_result(ctx, MessageChain.create([Plain("已停止Xenon。")]))
+            lib.state = "STOP"
+            await ctx.app.shutdown()
+        elif event.command == ".reboot" and event.perm_lv >= lib.permission.OPERATOR:
+            await event.send_result(ctx, MessageChain.create([Plain("正在重启Xenon。")]))
+            lib.state = "REBOOT"
             await ctx.app.shutdown()
 
     @ctx.bcc.receiver(CommandEvent)
@@ -65,7 +59,7 @@ async def main(ctx: lib.XenonContext):
             try:
                 user = int(user)
                 if lv.lower() in _mapping:
-                    lv = _mapping[lv]
+                    lv = _mapping[lv.lower()]
                 else:
                     lv = int(lv)
             except ValueError as e:
@@ -73,17 +67,7 @@ async def main(ctx: lib.XenonContext):
             else:
                 reply = f"设置用户 {user} 的权限为 {lv} 。"
                 await set_perm(user, lv)
-            if event.group:
-                await ctx.app.sendGroupMessage(
-                    group=event.group,
-                    message=MessageChain.create(
-                        [At(event.user), Plain("\n"), Plain(reply)]
-                    ),
-                )
-            elif event.user:
-                await ctx.app.sendFriendMessage(
-                    event.user, MessageChain.create([Plain(reply)])
-                )
+            await event.send_result(ctx, MessageChain.create([Plain(reply)]))
 
     @ctx.bcc.receiver(CommandEvent)
     async def query_permission(event: CommandEvent):
@@ -99,14 +83,4 @@ async def main(ctx: lib.XenonContext):
                 reply = f"无法识别参数: {e.args}"
             else:
                 reply = f"用户 {user} 的权限为 {await get_perm(user)} 。"
-            if event.group:
-                await ctx.app.sendGroupMessage(
-                    group=event.group,
-                    message=MessageChain.create(
-                        [At(event.user), Plain("\n"), Plain(reply)]
-                    ),
-                )
-            elif event.user:
-                await ctx.app.sendFriendMessage(
-                    event.user, MessageChain.create([Plain(reply)])
-                )
+            await event.send_result(ctx, MessageChain.create([Plain(reply)]))

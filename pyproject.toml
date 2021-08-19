@@ -13,6 +13,8 @@ graia-application-mirai = "0.19.2"
 graia-broadcast = "0.8.11"
 graia-scheduler = "0.0.4"
 aiosqlite = "^0.17.0"
+windows-curses = "^2.2.0"
+croniter = "^0.3.37"
 
 [tool.poetry.dev-dependencies]
 mcstatus = "^6.4.0"

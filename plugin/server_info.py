@@ -1,3 +1,4 @@
+# coding=utf-8
 import base64
 from typing import Optional, List
 
@@ -25,16 +26,28 @@ async def main(ctx: lib.XenonContext):
             event.command.startswith(".server_info")
             and event.perm_lv >= lib.permission.USER
         ):
-            if len(args := event.command.split(" ")) >= 2 and event.group:
+            if len(args := event.command.split(" ")) >= 2:
                 try:
                     server = mcstatus.MinecraftServer.lookup(args[1])
                     stat = await server.async_status()
                     players: Optional[
                         List[mcstatus.server.PingResponse.Players.Player]
                     ] = stat.players.sample
-                    await ctx.app.sendGroupMessage(
-                        group=event.group,
-                        message=MessageChain.create(
+                except Exception as e:
+                    await event.send_result(
+                        ctx,
+                        MessageChain.create(
+                            [
+                                At(event.user),
+                                Plain("\n"),
+                                Plain(f"{e}: {e.args}"),
+                            ]
+                        ),
+                    )
+                else:
+                    await event.send_result(
+                        ctx,
+                        MessageChain.create(
                             [
                                 Plain(f"{args[1]} 状态\n"),
                                 Image.fromUnsafeBytes(
@@ -56,17 +69,6 @@ async def main(ctx: lib.XenonContext):
                                     if players is not None
                                     else "无"
                                 ),
-                            ]
-                        ),
-                    )
-                except Exception as e:
-                    await ctx.app.sendGroupMessage(
-                        group=event.group,
-                        message=MessageChain.create(
-                            [
-                                At(event.user),
-                                Plain("\n"),
-                                Plain(f"{e}: {e.args}"),
                             ]
                         ),
                     )

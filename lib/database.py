@@ -1,3 +1,4 @@
+# coding=utf-8
 from typing import List, Optional
 
 import aiosqlite
@@ -28,7 +29,10 @@ async def open_db(name: str, declarations: Optional[str] = None) -> aiosqlite.Cu
 
 
 async def close_all():
+    global db_cursor, db_connections
     for cursor in db_cursor:
         await cursor.close()
     for conn in db_connections:
         await conn.close()
+    db_cursor = []
+    db_connections = []

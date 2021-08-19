@@ -1,3 +1,4 @@
+# coding=utf-8
 from typing import Literal, Optional
 
 from graia.application import Friend, Group, Member
@@ -48,8 +49,27 @@ class CommandEvent(MiraiEvent):
             group=group,
         )
 
+    async def send_result(self, ctx: XenonContext, message: MessageChain):
+        """
+        依据传入的参数自动发送结果至合适的端
+        :param ctx: XenonContext
+        :param message: 要发送的消息，local端的消息会自动 asDisplay() 处理
+        """
+        if self.source == "local":
+            ctx.logger.info(message.asDisplay())
+        elif self.group:
+            await ctx.app.sendGroupMessage(self.group, message)
+        else:
+            await ctx.app.sendFriendMessage(self.user, message)
+        return
+
 
 def initialize(ctx: XenonContext):
+    """
+    初始化 CommandEvent 的发送器
+    :param ctx: XenonContext
+    """
+
     @ctx.bcc.receiver(GroupMessage)
     async def broadcast_command(event: GroupMessage, user: Member, group: Group):
         ctx.bcc.postEvent(
