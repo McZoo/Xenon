@@ -8,6 +8,7 @@
 ![Code Style](https://img.shields.io/badge/code%20style-black-black)
 ![Version](https://img.shields.io/badge/version-0.3.1--exp-brightgreen)
 [![CodeFactor](https://www.codefactor.io/repository/github/mczoo/xenon/badge)](https://www.codefactor.io/repository/github/mczoo/xenon)
+[![Documentation Status](https://readthedocs.org/projects/xenon-bot/badge/?version=latest)](https://xenon-bot.readthedocs.io/en/latest/?badge=latest)
 
 ## 许可证
 Xenon 在与 [Mirai](https://github.com/mamoe/mirai) 和
