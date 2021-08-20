@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-The base file of Xenon library, provides `Version` class as global
+Xenon库的基础，提供了基础对象Version和XenonContext的实现
 """
 import asyncio
 import dataclasses
@@ -30,7 +30,12 @@ if TYPE_CHECKING:
 @dataclasses.dataclass(repr=False, order=True, frozen=True)
 class Version:
     """
-    Version object implementation
+    机器与人类均可读的 版本对象 实现
+
+    :param major(int): 主版本
+    :param minor(int): 副版本
+    :param micro(int): 修订版本
+    :param serial(str): 内部标记
     """
 
     major: int = 0
@@ -45,7 +50,7 @@ class Version:
         return f"<Version {self.__str__()}>"
 
 
-__version__ = Version(minor=3)  # check before new version rollout
+__version__ = Version(minor=3, micro=1)  # check before new version rollout
 
 state = "INIT"
 
@@ -53,7 +58,15 @@ state = "INIT"
 @dataclasses.dataclass
 class XenonContext:
     """
-    The container which has everything for Xenon to operate
+    含有 Xenon 所有环境信息的简单容器
+
+    :param con: Xenon控制台实例
+    :param logger: Xenon日志记录器实例
+    :param plugins: Xenon插件列表实例
+    :param loop: 主事件循环
+    :param app: GraiaMiraiApplication
+    :param bcc: BroadcastControl的实例
+    :param scheduler: Scheduler实例
     """
 
     con: "console.Console"
@@ -63,6 +76,27 @@ class XenonContext:
     app: "GraiaMiraiApplication"
     bcc: "Broadcast"
     scheduler: "GraiaScheduler"
+
+    def __init__(
+        self,
+        con: "console.Console",
+        logger: "log.Logger",
+        plugins: "plugin.XenonPluginList",
+        loop: "asyncio.AbstractEventLoop",
+        app: "GraiaMiraiApplication",
+        bcc: "Broadcast",
+        scheduler: "GraiaScheduler",
+    ):
+        """
+        初始化 XenonContext。
+        """
+        self.con = con
+        self.logger = logger
+        self.plugins = plugins
+        self.loop = loop
+        self.app = app
+        self.bcc = bcc
+        self.scheduler = scheduler
 
 
 if not TYPE_CHECKING:  # real importing work
