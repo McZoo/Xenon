@@ -154,6 +154,8 @@ disable=print-statement,
         too-many-boolean-expressions,
         too-many-branches,
         too-many-statements,
+        global-statement,
+        unsubscriptable-object
 
 
 
