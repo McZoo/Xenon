@@ -19,6 +19,7 @@ class XenonConfig(pydantic.BaseModel):
     """
     基于 BaseModel 的 设置类
     """
+
     name: str = ""
     _file_type: str = ""
 
@@ -70,7 +71,6 @@ class XenonConfig(pydantic.BaseModel):
         filename: str
         with open(filename, "w", encoding="utf-8") as file:
             dumper(self.dict(), file)
-        return
 
 
 @final

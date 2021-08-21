@@ -108,6 +108,7 @@ class UnloadedXenonPlugin(NamedTuple):
     """
     描述一个未被成功加载的插件
     """
+
     plugin_module: XenonPlugin
     dependency: dependency.UnmatchedDependency
     name: str
@@ -117,6 +118,7 @@ class XenonPluginContainer:
     """
     一个存储了所有已获取插件的容器
     """
+
     ctx: XenonContext
     loaded: Dict[str, XenonPlugin] = {}
     unloaded: List[UnloadedXenonPlugin] = []

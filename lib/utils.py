@@ -16,6 +16,7 @@ class SessionConfig(config.XenonConfig):
     """
     用于生成 graia.application.Session 的设置类
     """
+
     host: AnyHttpUrl
     account: int
     authKey: str
@@ -44,9 +45,11 @@ def get_session(con: console.Console, logger: log.Logger) -> Session:
         in_args = in_str.split(" ")
         if in_args[0] == "/session" and len(in_args) >= 4:
             try:
-                data = {"host": in_args[1],
-                        "authKey": " ".join(in_args[2:-1]),
-                        "account": in_args[-1]}
+                data = {
+                    "host": in_args[1],
+                    "authKey": " ".join(in_args[2:-1]),
+                    "account": in_args[-1],
+                }
                 cfg = SessionConfig(**data)
             except Exception as e:
                 con.output(f"{e}: {e.args}")

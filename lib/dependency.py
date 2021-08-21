@@ -28,7 +28,7 @@ class DependencyEntry(BaseModel):
             names=list(name_to_pypi.keys()),
             pypi_list=list(name_to_pypi.values()),
             resolvable=all(name_to_pypi.values()),
-            name_to_pypi=name_to_pypi
+            name_to_pypi=name_to_pypi,
         )
 
 
@@ -41,6 +41,7 @@ class UnmatchedDependency(BaseModel):
 
         name (List[str]): 不存在于 PyPI 上的模块的导入路径
     """
+
     pypi: List[str]
     name: List[str]
 
@@ -59,7 +60,7 @@ def verify_dependency(dep: DependencyEntry) -> Tuple[bool, UnmatchedDependency]:
             if find_spec(name) is None:
                 success = False
                 if (
-                        pypi_name := dep.name_to_pypi.get(name) is not None
+                    pypi_name := dep.name_to_pypi.get(name) is not None
                 ):  # we are able to resolve it to pypi
                     result.pypi.append(pypi_name)
                 else:

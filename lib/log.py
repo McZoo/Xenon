@@ -19,12 +19,12 @@ class LogManager(logging.Formatter, logging.Filter):
     """
 
     def __init__(
-            self,
-            level: int = logging.DEBUG,
-            fmt=None,
-            date_fmt=None,
-            style="%",
-            validate=True,
+        self,
+        level: int = logging.DEBUG,
+        fmt=None,
+        date_fmt=None,
+        style="%",
+        validate=True,
     ):
         """
         :param level: 消息过滤等级，整数
@@ -41,17 +41,25 @@ class LogManager(logging.Formatter, logging.Filter):
         return record.levelno >= self.filter_level
 
 
-simple_mgr = partial(LogManager, fmt="%(asctime)s-%(name)s-%(levelno)s: %(message)s",
-                     date_fmt="%H:%M:%S", level=logging.INFO)
+simple_mgr = partial(
+    LogManager,
+    fmt="%(asctime)s-%(name)s-%(levelno)s: %(message)s",
+    date_fmt="%H:%M:%S",
+    level=logging.INFO,
+)
 
-verbose_mgr = partial(LogManager, fmt="[%(asctime)s][%(name)s][%(levelname)s]: %(message)s",
-                      date_fmt="%Y-%m-%d %H:%M:%S", level=logging.DEBUG)
+verbose_mgr = partial(
+    LogManager,
+    fmt="[%(asctime)s][%(name)s][%(levelname)s]: %(message)s",
+    date_fmt="%Y-%m-%d %H:%M:%S",
+    level=logging.DEBUG,
+)
 
 
 def create_logger(
-        con: console.Console,
-        con_mgr: LogManager = simple_mgr(),
-        file_mgr: LogManager = verbose_mgr(),
+    con: console.Console,
+    con_mgr: LogManager = simple_mgr(),
+    file_mgr: LogManager = verbose_mgr(),
 ) -> Union[Logger, LoggingLogger]:
     """
     创建 Xenon Logger 作为顶级日志记录器
@@ -65,9 +73,9 @@ def create_logger(
     logger = logging.getLogger("")
     logger.level = logging.DEBUG
     file_handler = logging.handlers.TimedRotatingFileHandler(
-        filename=join(path.log, f"current.log"), encoding="utf-8", when="midnight"
+        filename=join(path.log, "current.log"), encoding="utf-8", when="midnight"
     )
-    file_handler.namer = lambda name: name + '.log'
+    file_handler.namer = lambda name: name + ".log"
     con_handler = logging.handlers.QueueHandler(con.log_queue)
     file_handler.setFormatter(file_mgr)
     file_handler.addFilter(file_mgr)
