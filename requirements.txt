@@ -3,9 +3,9 @@ pydantic
 PyYAML
 aiosqlite
 croniter
-graia-mirai-application = 0.19.2
-graia-broadcast = 0.8.11
-graia-scheduler = 0.0.4
+graia-mirai-application == 0.19.2
+graia-broadcast == 0.8.11
+graia-scheduler == 0.0.4
 sphinx
 sphinx-rtd-theme
 recommonmark
