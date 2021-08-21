@@ -1,3 +1,4 @@
+prompt-toolkit
 aiohttp
 pydantic
 PyYAML
