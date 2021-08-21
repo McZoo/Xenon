@@ -52,6 +52,7 @@ class XenonPluginSpec:
     def is_spec(obj) -> bool:
         """
         检查对象是否为有效的 插件规格
+
         :param obj: 对象
         :return: 布尔值，指示是否符合
         """
@@ -82,7 +83,6 @@ class XenonPlugin(abc.ABC):
         检查对象是否为有效的 插件
 
         :param obj: 对象
-
         :return: 布尔值，指示是否符合
         """
         if hasattr(obj, "plugin_spec") and (
