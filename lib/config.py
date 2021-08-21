@@ -1,219 +1,89 @@
 # coding=utf-8
 """
-Xenon config module
-"""
-import decimal
-import functools
-import json
-import os.path
-from abc import ABC, abstractmethod
-from functools import partial
-from types import FunctionType
-from typing import Any, Callable, Dict, List, NamedTuple, Type, TypeVar, Union
+Xenon 的设置
 
+基于 pydantic，为插件提供了统一的设置接口。
+"""
+import json
+import os
+from functools import partial
+from typing import Optional, Literal, final
+
+import pydantic
 import yaml
 
 from . import path
 
-MISSING = object()
 
-
-class Entry(NamedTuple):
+class XenonConfig(pydantic.BaseModel):
     """
-    Entry that should take place of default
+    基于 BaseModel 的 设置类
     """
 
-    value: Any = MISSING
-    func: Callable[[Any], Any] = MISSING
-
-
-class ResolveEntry(NamedTuple):
-    """
-    The result of resolving a class's annotations or class variants
-    """
-
-    name: str
-    label: Union[Type["XenonConfigTemplate"], Type]
-    default: Union[Entry, Any] = MISSING
-    subclass: List["ResolveEntry"] = MISSING
-
-
-def _create(annotations, default, subclass):
-    """
-    Create a list of ResolveEntry from given dicts
-    """
-    result = list()
-    for k, v in annotations.items():
-        _default = default[k] if k in default else MISSING
-        _subclass = subclass[k] if k in subclass else MISSING
-        result.append(ResolveEntry(k, v, _default, _subclass))
-    return result
-
-
-def resolve(cls: Type["XenonConfigTemplate"]) -> List[ResolveEntry]:
-    """
-    Process a "XenonConfigTemplate" class recursively
-    """
-    if cls.resolve_result_cache__ is None:
-        annotations: Dict[
-            str, Union[type, Type["XenonConfigTemplate"]]
-        ] = cls.__annotations__ | {
-            k: v
-            for k, v in vars(cls).items()
-            if not k.startswith("_") and not k.endswith("_") and type(v) is type
-        }
-        default = {
-            k: v
-            for k, v in vars(cls).items()
-            if not k.startswith("_") and not k.endswith("_") and not type(v) is type
-        }
-        subclass = {
-            k: v.resolve_()
-            for k, v in vars(cls).items()
-            if not k.startswith("_") and not k.endswith("_") and type(v) is type
-        }
-        cls.resolve_result_cache__ = _create(annotations, default, subclass)
-    return cls.resolve_result_cache__
-
-
-class XenonConfigTemplate(ABC):
-    """
-    The abstract base class of Xenon config templates.
-    """
-
-    __annotations__: Dict[str, Type]
-    resolve_result_cache__: Union[List[ResolveEntry], None]
+    name: str = ""
+    _file_type: str = ""
 
     @classmethod
-    @abstractmethod
-    def resolve_(cls) -> List[ResolveEntry]:
+    def get_config(cls, name: str) -> Optional["XenonConfig"]:
         """
-        Recursively resolve a config template.
-        :return: A list of ResolveEntry
+        通过 name 指定设置文件的名称
+
+        :param name: 插件设置文件的名称
+
+        :return: 设置 的实例
         """
-
-
-T_Config = TypeVar("T_Config", XenonConfigTemplate, object)
-
-
-def parse_from_dict(cls: Type[T_Config], content: Dict[str, Any]) -> T_Config:
-    """
-    return a configured config instance from provided dictionary
-    :param cls: config class
-    :param content: a dict parsed from yaml or json file
-    :return: the instance of cls
-    """
-    resolve_result: List[ResolveEntry] = cls.resolve_()
-    new_instance: XenonConfigTemplate = cls()
-    for entry in resolve_result:
-        if entry.subclass is not MISSING:
-            if (
-                entry.name in content
-            ):  # let entry.name missing situation bypass to next if statement
-                setattr(
-                    new_instance,
-                    entry.name,
-                    parse_from_dict(entry.label, content[entry.name]),
-                )
-        if entry.name not in content:
-            if entry.default is MISSING:
-                if entry.subclass is MISSING:
-                    raise KeyError(f"Missing necessary key: {entry.name}")
-                else:  # entry is a subclass
-                    try:
-                        replacement = parse_from_dict(entry.label, {})
-                    except KeyError as e:
-                        raise KeyError from e
-                    else:  # this subclass could be ignored safely
-                        setattr(new_instance, entry.name, replacement)
-            else:
-                if type(entry.default) is not Entry:
-                    setattr(new_instance, entry.name, entry.default)
-                else:
-                    if entry.default.value is MISSING:
-                        raise KeyError(f"Missing necessary key: {entry.name}")
-                    setattr(new_instance, entry.name, entry.default.value)
+        filepath_no_prefix = os.path.abspath(os.path.join(path.config, name))
+        if os.path.isfile(filepath_no_prefix + ".yml"):
+            filename = filepath_no_prefix + ".yml"
+            f_type = "yaml"
+            loader = partial(yaml.load, Loader=yaml.loader.FullLoader)
+        elif os.path.isfile(filepath_no_prefix + ".json"):
+            filename = filepath_no_prefix + ".json"
+            f_type = "json"
+            loader = partial(json.load)
         else:
-            if type(entry.default) is not Entry:
-                setattr(new_instance, entry.name, content[entry.name])
-            else:
-                if isinstance(entry.default.func, FunctionType):
-                    setattr(
-                        new_instance,
-                        entry.name,
-                        entry.default.func(content[entry.name]),
-                    )
-                else:
-                    setattr(new_instance, entry.name, content[entry.name])
-    return new_instance
+            raise FileNotFoundError("Couldn't find a proper config file")
+        filename: str
+        with open(filename, "r", encoding="utf-8") as file:
+            content = loader(file) | {"name": name, "_file_type": f_type}
+            return cls(**content)
+
+    def write(self, file_type: Literal["yaml", "json"] = "") -> None:
+        """
+        将当前设置写入文件，由 `self.name` 指定名称
+
+        :param file_type: 指定文件格式，若未指定则尝试使用设置内缓存的文件类型，默认为yaml
+
+        :return 无
+        """
+        filepath_no_prefix = os.path.abspath(os.path.join(path.config, self.name))
+        file_type = file_type or self._file_type
+        if not file_type:
+            file_type = "yaml"
+        if file_type == "yaml":
+            filename = filepath_no_prefix + ".yml"
+            dumper = partial(yaml.dump, Dumper=yaml.dumper.BaseDumper)
+        elif file_type == "json":
+            filename = filepath_no_prefix + ".json"
+            dumper = partial(json.dump)
+        else:
+            raise FileNotFoundError("Couldn't find a proper config file")
+        filename: str
+        with open(filename, "w", encoding="utf-8") as file:
+            dumper(self.dict(), file)
 
 
-def parse(cls: Type[T_Config], name: str) -> T_Config:
+@final
+class EmptyConfig(XenonConfig):
     """
-    parse the Config class with a name
-    :param cls: the class
-    :param name: required file name
-    :return: Config class's prepared instance
-    :raises FileNotFoundError, KeyError
+    作为”空“设置的模板类，意味着你不应该继承它
+
+    重载了 `get_config` 方法与 `write` 方法以避免生成空设置文件
     """
-    if cls is None:
+
+    @classmethod
+    def get_config(cls, name: str) -> None:
         return None
-    filepath_no_prefix = os.path.abspath(os.path.join(path.config, name))
-    if os.path.isfile(filepath_no_prefix + ".yaml"):
-        filename = filepath_no_prefix + ".yaml"
-        loader = partial(yaml.load, Loader=yaml.loader.FullLoader)
-    elif os.path.isfile(filepath_no_prefix + ".yml"):
-        filename = filepath_no_prefix + ".yml"
-        loader = partial(yaml.load, Loader=yaml.loader.FullLoader)
-    elif os.path.isfile(filepath_no_prefix + ".json"):
-        filename = filepath_no_prefix + ".json"
-        loader = partial(json.load)
-    else:
-        raise FileNotFoundError("Couldn't find a proper config file")
-    filename: str
-    with open(filename, "r", encoding="utf-8") as file:
-        content = loader(file)
-    return parse_from_dict(cls, content)
 
-
-def config(cls: type):
-    """
-    @decorator recursively add `resolve_` method to a class to make it a `XenonConfigTemplate`
-    :param cls: class
-    :return: original class, casted to `XenonConfigTemplate`
-    """
-    cls.resolve_ = functools.partial(resolve, cls)
-    cls.resolve_result_cache__ = None
-    subclasses = {key: s_cls for key, s_cls in vars(cls).items() if type(s_cls) is type}
-    for k, sub_cls in subclasses.items():
-        setattr(cls, k, config(sub_cls))
-    return cls
-
-
-def bool_converter(value) -> bool:
-    """
-    A convenient converter to boolean type
-    :param value: values that can be casted to bool, like "yes" "no" "true", etc.
-    :return: bool
-    """
-    if isinstance(value, str):
-        value: str
-        if value.lower() in ("yes", "true", "ok"):
-            return True
-        elif value.lower() in ("no", "false"):
-            return False
-    return bool(value)
-
-
-def decimal_converter(value) -> decimal.Decimal:
-    """
-    A convenient converter to decimal.Decimal
-    :param value: convertible values
-    :return: decimal.Decimal or the original value
-    """
-    if isinstance(value, (str, float, int)):
-        try:
-            return decimal.Decimal(str(value))
-        except decimal.InvalidOperation:
-            pass
-    return value
+    def write(self, file_type: Literal["yaml", "json"] = "") -> None:
+        return None

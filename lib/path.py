@@ -1,4 +1,17 @@
 # coding=utf-8
+"""
+Xenon 相关路径获取，同时自动创建必要路径
+
+root: 根路径
+
+config: 设置文件所在路径
+
+log: 日志文件所在路径
+
+plugin: 插件所在路径
+
+database: 数据库文件所在路径
+"""
 from os import makedirs
 from os.path import abspath, join, exists
 

@@ -50,7 +50,7 @@ class Version:
         return f"<Version {self.__str__()}>"
 
 
-__version__ = Version(minor=3, micro=1)  # check before new version rollout
+__version__ = Version(minor=3, micro=2)  # check before new version rollout
 
 state = "INIT"
 
@@ -71,7 +71,7 @@ class XenonContext:
 
     con: "console.Console"
     logger: "log.Logger"
-    plugins: "plugin.XenonPluginList"
+    plugins: "plugin.XenonPluginContainer"
     loop: "asyncio.AbstractEventLoop"
     app: "GraiaMiraiApplication"
     bcc: "Broadcast"
@@ -81,7 +81,7 @@ class XenonContext:
         self,
         con: "console.Console",
         logger: "log.Logger",
-        plugins: "plugin.XenonPluginList",
+        plugins: "plugin.XenonPluginContainer",
         loop: "asyncio.AbstractEventLoop",
         app: "GraiaMiraiApplication",
         bcc: "Broadcast",

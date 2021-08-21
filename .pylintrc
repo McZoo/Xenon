@@ -155,7 +155,8 @@ disable=print-statement,
         too-many-branches,
         too-many-statements,
         global-statement,
-        unsubscriptable-object
+        unsubscriptable-object,
+        redefined-builtin
 
 
 

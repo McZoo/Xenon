@@ -11,7 +11,6 @@ Xenon 的基础功能已经全部可用。
 - SQL常用语句集成
 - Command调用冷却
 - Console的彩色文本输出支持 （需要 [PT_PR#1455](https://github.com/prompt-toolkit/python-prompt-toolkit/pull/1455))
-- 写入设置
 - 自动安装依赖 / 导出 requirements.txt
 
 ## Repo/仓库

@@ -1,38 +1,58 @@
 # coding=utf-8
-import dataclasses
+"""
+Xenon 依赖解析
+"""
 from importlib.util import find_spec
-from typing import List, Mapping, NamedTuple, Tuple, Union
+from typing import List, Mapping, Tuple, Union, Dict
+
+from pydantic import BaseModel
 
 
-@dataclasses.dataclass
-class DependencyEntry:
+class DependencyEntry(BaseModel):
     """
-    Specify external dependency requirement
+    声明外部依赖的类
     """
 
     names: List[str]
-    pypi_list = List[Union[str, None]]
-    resolvable: bool
-    name_to_pypi: Mapping[str, str] = dataclasses.field(repr=False)
+    pypi_list: List[Union[str, None]]
+    resolvable: bool = False
+    name_to_pypi: Dict[str, str]
 
     def __init__(self, name_to_pypi: Mapping[str, str]):
         """
-        Build dependency entry
-        :param name_to_pypi: Mapping: package [import path] to its [PyPI name]
-              if it's PyPI available else None
+        构造依赖条目
+
+        :param name_to_pypi: 自导入路径到 PyPI 包名的映射，如果 PyPI 不存在该包则为 `None`
         """
-        self.names = list(iter(name_to_pypi.keys()))
-        self.pypi_list = list(iter(name_to_pypi.values()))
-        self.resolvable = not bool(None in self.pypi_list)
-        self.name_to_pypi = name_to_pypi
+        super().__init__(
+            names=list(name_to_pypi.keys()),
+            pypi_list=list(name_to_pypi.values()),
+            resolvable=all(name_to_pypi.values()),
+            name_to_pypi=name_to_pypi,
+        )
 
 
-class UnmatchedDependency(NamedTuple):
+class UnmatchedDependency(BaseModel):
+    """
+    描述插件中未满足的需求
+
+    属性：
+        pypi (List[str]): 存在于 PyPI 上的模块包名
+
+        name (List[str]): 不存在于 PyPI 上的模块的导入路径
+    """
+
     pypi: List[str]
     name: List[str]
 
 
 def verify_dependency(dep: DependencyEntry) -> Tuple[bool, UnmatchedDependency]:
+    """
+    检查一个依赖条目中是否所有项目都可用
+
+    :param dep: 依赖条目
+    :return: 二元组，第一项指示是否 完全可用，第二项为未满足的需求
+    """
     result: UnmatchedDependency = UnmatchedDependency(pypi=[], name=[])
     success: bool = True
     if dep is not None:

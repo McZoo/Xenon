@@ -1,4 +1,7 @@
 # coding=utf-8
+"""
+Xenon 权限管理
+"""
 from typing import Optional, Union
 
 from aiosqlite import Cursor
@@ -27,6 +30,12 @@ _mapping = {
 
 
 async def get_perm(user: Union[Friend, Member, int]) -> int:
+    """
+    获取用户的权限
+
+    :param user: 用户实例或QQ号
+    :return: 等级，整数
+    """
     if type(user) in (Friend, Member):
         user = user.id
     user: int
@@ -40,6 +49,12 @@ async def get_perm(user: Union[Friend, Member, int]) -> int:
 
 
 async def set_perm(user: Union[Friend, Member, int], level: int) -> None:
+    """
+    设置用户的权限为特定等级
+
+    :param user: 用户实例或QQ号
+    :param level: 等级，整数
+    """
     if type(user) in (Friend, Member):
         user = user.id
     user: int
@@ -54,6 +69,11 @@ async def set_perm(user: Union[Friend, Member, int], level: int) -> None:
 
 
 async def open_perm_db():
+    """
+    打开 Xenon 的 权限 数据库
+
+    因为打开数据库是异步的，所以需要作为协程函数调用
+    """
     global cursor
     cursor = await database.open_db(
         "permission", "(" "id INTEGER PRIMARY KEY," "level INTEGER" ")"
