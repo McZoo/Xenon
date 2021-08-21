@@ -9,3 +9,5 @@ graia-scheduler == 0.0.4
 sphinx
 sphinx-rtd-theme
 recommonmark
+autodoc
+autodoc-pydantic
