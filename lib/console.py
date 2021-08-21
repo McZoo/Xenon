@@ -1,4 +1,7 @@
 # coding=utf-8
+"""
+Xenon 的 控制台 实现
+"""
 import asyncio
 import queue
 import threading
@@ -11,12 +14,16 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
 
 import lib
-from lib import permission
 from lib import XenonContext
+from lib import permission
 from lib.command import CommandEvent
 
 
 class Console(threading.Thread):
+    """
+    Xenon 的控制台线程。
+    """
+
     def __init__(self):
         threading.Thread.__init__(self, name="ConsoleThread")
         # NEVER set daemon to True
@@ -28,33 +35,58 @@ class Console(threading.Thread):
         self.loop: Optional[asyncio.AbstractEventLoop] = None
         self.ctx: Optional[XenonContext] = None
 
+    async def command_poster(self):
+        """
+        不断尝试获取新的输入，并作为 CommandEvent 广播
+        """
+        while lib.state == "RUN":
+            await asyncio.sleep(0.01)
+            try:
+                in_str = self.in_queue.get_nowait()
+            except queue.Empty:
+                pass
+            else:
+                if self.ctx.bcc:
+                    self.ctx.bcc.postEvent(
+                        CommandEvent("local", in_str, permission.ADMIN)
+                    )
+
     def stop(self):
+        """
+        停止控制台。
+
+        会阻塞直到控制台线程停止，以防止出现问题。
+        """
         self.output("Press ENTER to continue...")
         self.__running = False
         self.join()
 
     def input(self) -> str:
+        """
+        从内置的输入队列直接读取。
+
+        注意：程序不应自行使用本函数读取控制台输入，而应该通过处理 CommandEvent 获取输入。
+        """
         return self.in_queue.get()
 
     def output(self, value: str):
+        """
+        直接输出消息，正常情况下程序应该尽量通过 logger 直接记录日志，
+        仅应在需要和控制台确认凭证时使用
+
+        :param value: 输出的消息
+        """
         self.out_queue.put(value)
 
     def set_ctx(self, ctx: XenonContext):
+        """
+        设置 XenonContext，并向其中的 BroadcastControl 注册命令事件发送的函数
+
+        :param ctx: XenonContext 的实例
+        """
         self.ctx = ctx
 
-        @self.ctx.bcc.receiver(ApplicationLaunched)
-        async def command_poster():
-            while lib.state == "RUN":
-                await asyncio.sleep(0.01)
-                try:
-                    in_str = self.in_queue.get_nowait()
-                except queue.Empty:
-                    pass
-                else:
-                    if self.ctx.bcc:
-                        self.ctx.bcc.postEvent(
-                            CommandEvent("local", in_str, permission.ADMIN)
-                        )
+        self.ctx.bcc.receiver(ApplicationLaunched)(self.command_poster)
 
     async def _a_input(self):
         p_session = PromptSession()
@@ -86,6 +118,11 @@ class Console(threading.Thread):
         await in_tsk
 
     def run(self):
+        """
+        控制台线程的主函数。
+
+        本线程会自动创建一个新的事件循环，并运行I/O协程
+        """
         self.__running = True
         self.out_queue.put("Starting console......")
         self.loop = asyncio.new_event_loop()

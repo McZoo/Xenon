@@ -19,7 +19,7 @@ if __name__ == "__main__":
         bcc = Broadcast(loop=loop)
         scheduler = GraiaScheduler(loop, bcc)
         app = GraiaMiraiApplication(broadcast=bcc, connect_info=session)
-        plugins = lib.plugin.XenonPluginList.load_plugins()
+        plugins = lib.plugin.XenonPluginContainer.load_plugins()
         ctx = lib.XenonContext(con, logger, plugins, loop, app, bcc, scheduler)
         con.set_ctx(ctx)
         plugins.ctx = ctx
