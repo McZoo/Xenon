@@ -4,8 +4,8 @@ Xenon 的基础功能已经全部可用。
 
 接下来，我们将基于本优先化的Roadmap添加更多特性。
 
-## Plugins/插件
-- 历史上的今天使用PIL
+## Important / 重要
+添加Saya支持，完成后版本号会直接步进至 0.4.0
 
 ## Features/特性
 - SQL常用语句集成

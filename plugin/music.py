@@ -27,14 +27,14 @@ async def main(ctx: lib.XenonContext):
                 try:
                     async with aiohttp.ClientSession() as session:
                         async with session.get(
-                            f"http://cloud-music.pl-fe.cn/search?keywords={info}"
+                            f"http://cloud-music.pl-fe.cn/cloudsearch?keywords={info}"
                         ) as resp:
                             search_result = json.loads(await resp.text())
                         if search_result["result"]["songCount"]:
                             song_data = search_result["result"]["songs"][0]
                             song_id = song_data["id"]
                             song_name = song_data["name"]
-                            singers = ",".join(i["name"] for i in song_data["artists"])
+                            singers = ",".join(i["name"] for i in song_data["ar"])
                             xml_text = (
                                 '<?xml version="1.0"?>'
                                 '<msg serviceID="2" templateID="1" action="web" '
@@ -42,7 +42,8 @@ async def main(ctx: lib.XenonContext):
                                 f'url="http://y.music.163.com/m/song?id={song_id}" flag="0"'
                                 ' adverSign="0" multiMsgFlag="0">'
                                 '<item layout="2">'
-                                '<audio src="http://music.163.com/song/'
+                                f"<audio "
+                                'src="http://music.163.com/song/'
                                 f'media/outer/url?id={song_id}.mp3"/>'
                                 f"<title>{song_name}</title>"
                                 f"<summary>{singers}</summary></item></msg>"
@@ -51,7 +52,7 @@ async def main(ctx: lib.XenonContext):
                         else:
                             raise ValueError("无歌曲匹配")
                 except Exception as e:
-                    reply = MessageChain.create([Plain(f"{e}: {e.args}")])
+                    reply = MessageChain.create([Plain(f"{repr(e)}")])
             else:
                 reply = MessageChain.create([Plain("错误的命令")])
             await event.send_result(ctx, reply)

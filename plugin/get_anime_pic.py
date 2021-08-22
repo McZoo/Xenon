@@ -144,7 +144,7 @@ async def main(ctx: lib.XenonContext):
             try:
                 img_data, pid = await func()
             except Exception as e:
-                reply = MessageChain.create([Plain(f"{e}: {e.args}")])
+                reply = MessageChain.create([Plain(f"{repr(e)}")])
             else:
                 reply = MessageChain.create(
                     [

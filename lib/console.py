@@ -6,7 +6,6 @@ import asyncio
 import queue
 import threading
 import time
-from logging import LogRecord
 from typing import Optional
 
 from graia.application.event.lifecycle import ApplicationLaunched
@@ -29,7 +28,6 @@ class Console(threading.Thread):
         # NEVER set daemon to True
         # NEVER
         self.out_queue: queue.Queue[str] = queue.Queue()
-        self.log_queue: queue.Queue[LogRecord] = queue.Queue()
         self.in_queue: queue.Queue[str] = queue.Queue()
         self.__running: bool = False
         self.loop: Optional[asyncio.AbstractEventLoop] = None
@@ -97,17 +95,12 @@ class Console(threading.Thread):
             self.in_queue.put(curr_input)
 
     async def _a_output(self):
-        while self.__running or self.out_queue.qsize() or self.log_queue.qsize():
+        while self.__running or self.out_queue.qsize():
             await asyncio.sleep(0.01)
             try:
                 msg = self.out_queue.get_nowait()
                 print(msg)
                 #  Keep an eye on PT#1453
-            except queue.Empty:
-                pass
-            try:
-                rec = self.log_queue.get_nowait()
-                print(rec.msg)
             except queue.Empty:
                 pass
 

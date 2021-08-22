@@ -6,6 +6,7 @@ import asyncio
 import dataclasses
 from typing import TYPE_CHECKING
 
+import loguru
 from graia.application import GraiaMiraiApplication
 from graia.broadcast import Broadcast
 from graia.scheduler import GraiaScheduler
@@ -19,7 +20,6 @@ if TYPE_CHECKING:
         console,
         database,
         dependency,
-        log,
         path,
         permission,
         plugin,
@@ -50,7 +50,7 @@ class Version:
         return f"<Version {self.__str__()}>"
 
 
-__version__ = Version(minor=3, micro=2)  # check before new version rollout
+__version__ = Version(minor=3, micro=3)  # check before new version rollout
 
 state = "INIT"
 
@@ -70,17 +70,20 @@ class XenonContext:
     """
 
     con: "console.Console"
-    logger: "log.Logger"
+    logger: "loguru.Logger"
     plugins: "plugin.XenonPluginContainer"
     loop: "asyncio.AbstractEventLoop"
     app: "GraiaMiraiApplication"
     bcc: "Broadcast"
     scheduler: "GraiaScheduler"
+    __current: "XenonContext" = dataclasses.Field(
+        None, None, False, False, False, False, None
+    )
 
     def __init__(
         self,
         con: "console.Console",
-        logger: "log.Logger",
+        logger: "loguru.Logger",
         plugins: "plugin.XenonPluginContainer",
         loop: "asyncio.AbstractEventLoop",
         app: "GraiaMiraiApplication",
@@ -97,6 +100,11 @@ class XenonContext:
         self.app = app
         self.bcc = bcc
         self.scheduler = scheduler
+        XenonContext.__current = self
+
+    @classmethod
+    def current(cls):
+        return cls.__current
 
 
 if not TYPE_CHECKING:  # real importing work
@@ -106,7 +114,6 @@ if not TYPE_CHECKING:  # real importing work
         console,
         database,
         dependency,
-        log,
         path,
         permission,
         plugin,

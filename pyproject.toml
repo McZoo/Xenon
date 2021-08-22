@@ -12,8 +12,10 @@ types-PyYAML = "^5.4.6"
 graia-application-mirai = "0.19.2"
 graia-broadcast = "0.8.11"
 graia-scheduler = "0.0.4"
+graia-saya = "0.0.10"
 aiosqlite = "^0.17.0"
 croniter = "^0.3.37"
+loguru = "^0.5.3"
 
 [tool.poetry.dev-dependencies]
 mcstatus = "^6.4.0"

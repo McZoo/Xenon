@@ -8,7 +8,6 @@ lib - Xenon 库的基础
 
     console
     config
-    log
     database
     command
     permission
