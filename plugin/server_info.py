@@ -40,7 +40,7 @@ async def main(ctx: lib.XenonContext):
                             [
                                 At(event.user),
                                 Plain("\n"),
-                                Plain(f"{e}: {e.args}"),
+                                Plain(f"{repr(e)}"),
                             ]
                         ),
                     )

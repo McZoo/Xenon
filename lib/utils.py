@@ -20,10 +20,14 @@ def config_logger():
     配置 loguru 的日志记录器
     """
     logger.remove(0)  # 从 loguru 的日志记录器移除默认的配置器并重新创建
-    stdout_fmt = "<green>{time:HH:mm:ss}</green>-<level>{level}</level>-" \
-                 "<cyan>{name}</cyan>: <level>{message}</level>"
+    stdout_fmt = (
+        "<green>{time:HH:mm:ss}</green>-<level>{level}</level>-"
+        "<cyan>{name}</cyan>: <level>{message}</level>"
+    )
     logger.add(StdoutProxy(raw=True), format=stdout_fmt, level="INFO")
-    logger.add(join(path.log, "{time: YYYY-MM-DD}.log"), level="DEBUG", rotation="00:00")
+    logger.add(
+        join(path.log, "{time: YYYY-MM-DD}.log"), level="DEBUG", rotation="00:00"
+    )
 
 
 class SessionConfig(config.XenonConfig):
@@ -65,7 +69,7 @@ def get_session(con: console.Console) -> Session:
                 }
                 cfg = SessionConfig(**data)
             except Exception as e:
-                con.output(f"{e}: {e.args}")
+                con.output(f"{repr(e)}")
             else:
                 flag = False
     return Session(**cfg.dict())

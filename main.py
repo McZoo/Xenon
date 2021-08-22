@@ -8,6 +8,7 @@ from graia.broadcast import Broadcast
 from graia.scheduler import GraiaScheduler
 from typing import cast
 
+
 import lib
 
 if __name__ == "__main__":
@@ -20,8 +21,9 @@ if __name__ == "__main__":
         loop = asyncio.new_event_loop()
         bcc = Broadcast(loop=loop)
         scheduler = GraiaScheduler(loop, bcc)
-        app = GraiaMiraiApplication(broadcast=bcc, connect_info=session,
-                                    logger=cast(AbstractLogger, logger))
+        app = GraiaMiraiApplication(
+            broadcast=bcc, connect_info=session, logger=cast(AbstractLogger, logger)
+        )
         plugins = lib.plugin.XenonPluginContainer.load_plugins()
         ctx = lib.XenonContext(con, logger, plugins, loop, app, bcc, scheduler)
         con.set_ctx(ctx)

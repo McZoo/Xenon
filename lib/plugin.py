@@ -192,7 +192,7 @@ class XenonPluginContainer:
                 self.ctx.logger.error(
                     f"Plugin {plugin.plugin_spec.name}'s config file is broken:"
                 )
-                self.ctx.logger.error(f"{e}: {e.args}")
+                self.ctx.logger.error(f"{repr(e)}")
                 require_remove.append(name)
         for i in require_remove:
             broke = self.loaded.pop(i)
