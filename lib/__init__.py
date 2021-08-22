@@ -6,6 +6,7 @@ import asyncio
 import dataclasses
 from typing import TYPE_CHECKING
 
+import loguru
 from graia.application import GraiaMiraiApplication
 from graia.broadcast import Broadcast
 from graia.scheduler import GraiaScheduler
@@ -19,7 +20,6 @@ if TYPE_CHECKING:
         console,
         database,
         dependency,
-        log,
         path,
         permission,
         plugin,
@@ -70,7 +70,7 @@ class XenonContext:
     """
 
     con: "console.Console"
-    logger: "log.Logger"
+    logger: "loguru.Logger"
     plugins: "plugin.XenonPluginContainer"
     loop: "asyncio.AbstractEventLoop"
     app: "GraiaMiraiApplication"
@@ -80,7 +80,7 @@ class XenonContext:
     def __init__(
         self,
         con: "console.Console",
-        logger: "log.Logger",
+        logger: "loguru.Logger",
         plugins: "plugin.XenonPluginContainer",
         loop: "asyncio.AbstractEventLoop",
         app: "GraiaMiraiApplication",
@@ -106,7 +106,6 @@ if not TYPE_CHECKING:  # real importing work
         console,
         database,
         dependency,
-        log,
         path,
         permission,
         plugin,

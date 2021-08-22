@@ -3,13 +3,27 @@
 Xenon 的工具库，封装了一些有用的函数
 """
 from datetime import datetime
+from os.path import join
 from typing import Iterable, Optional
 
 from croniter import croniter
 from graia.application import Session
+from loguru import logger
+from prompt_toolkit.patch_stdout import StdoutProxy
 from pydantic import AnyHttpUrl
 
-from . import config, console, log
+from . import config, console, path
+
+
+def config_logger():
+    """
+    配置 loguru 的日志记录器
+    """
+    logger.remove(0)  # 从 loguru 的日志记录器移除默认的配置器并重新创建
+    stdout_fmt = "<green>{time:HH:mm:ss}</green>-<level>{level}</level>-" \
+                 "<cyan>{name}</cyan>: <level>{message}</level>"
+    logger.add(StdoutProxy(raw=True), format=stdout_fmt, level="INFO")
+    logger.add(join(path.log, "{time: YYYY-MM-DD}.log"), level="DEBUG", rotation="00:00")
 
 
 class SessionConfig(config.XenonConfig):
@@ -22,12 +36,11 @@ class SessionConfig(config.XenonConfig):
     authKey: str
 
 
-def get_session(con: console.Console, logger: log.Logger) -> Session:
+def get_session(con: console.Console) -> Session:
     """
     自动获取有效的 Session，并自动写入设置
 
     :param con: Xenon 的 Console 实例
-    :param logger: Xenon 的 Logger 实例
     :return: graia.application.Session 实例
     """
     flag = False
