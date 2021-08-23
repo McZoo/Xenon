@@ -29,6 +29,18 @@ _mapping = {
 }
 
 
+async def open_perm_db():
+    """
+    打开 Xenon 的 权限 数据库
+
+    因为打开数据库是异步的，所以需要作为协程函数调用
+    """
+    global cursor
+    cursor = await database.Database.current().open(
+        "permission", "(id INTEGER PRIMARY KEY," "level INTEGER)"
+    )
+
+
 async def get_perm(user: Union[Friend, Member, int]) -> int:
     """
     获取用户的权限
@@ -65,16 +77,4 @@ async def set_perm(user: Union[Friend, Member, int], level: int) -> None:
             user,
             level,
         ),
-    )
-
-
-async def open_perm_db():
-    """
-    打开 Xenon 的 权限 数据库
-
-    因为打开数据库是异步的，所以需要作为协程函数调用
-    """
-    global cursor
-    cursor = await database.open_db(
-        "permission", "(" "id INTEGER PRIMARY KEY," "level INTEGER" ")"
     )

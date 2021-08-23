@@ -26,7 +26,10 @@ def config_logger():
     )
     logger.add(StdoutProxy(raw=True), format=stdout_fmt, level="INFO")
     logger.add(
-        join(path.log, "{time: YYYY-MM-DD}.log"), level="DEBUG", rotation="00:00"
+        join(path.log, "{time: YYYY-MM-DD}.log"),
+        encoding="utf-8",
+        level="DEBUG",
+        rotation="00:00",
     )
 
 
