@@ -1,13 +1,15 @@
 # coding=utf-8
 import asyncio
+from typing import cast
 
-from loguru import logger
 from graia.application import GraiaMiraiApplication, AbstractLogger
 from graia.application.exceptions import InvaildSession
 from graia.broadcast import Broadcast
+from graia.saya import Saya
+from graia.saya.builtins.broadcast import BroadcastBehaviour
 from graia.scheduler import GraiaScheduler
-from typing import cast
-
+from graia.scheduler.saya import GraiaSchedulerBehaviour
+from loguru import logger
 
 import lib
 
@@ -15,27 +17,28 @@ if __name__ == "__main__":
     con = lib.console.Console()
     con.start()
     lib.utils.config_logger()
+    lib.state = "RUN"
+    loop = asyncio.new_event_loop()
     session = lib.utils.get_session(con)
-    while lib.state != "STOP":  # Lazarus
-        lib.state = "RUN"
-        loop = asyncio.new_event_loop()
-        bcc = Broadcast(loop=loop)
-        scheduler = GraiaScheduler(loop, bcc)
-        app = GraiaMiraiApplication(
-            broadcast=bcc, connect_info=session, logger=cast(AbstractLogger, logger)
-        )
-        plugins = lib.plugin.XenonPluginContainer.load_plugins()
-        ctx = lib.XenonContext(con, logger, plugins, loop, app, bcc, scheduler)
-        con.set_ctx(ctx)
-        plugins.ctx = ctx
-        lib.command.initialize(ctx)
-        loop.run_until_complete(lib.permission.open_perm_db())
-        loop.run_until_complete(plugins.prepare())
-        try:
-            app.launch_blocking()
-        except (asyncio.exceptions.CancelledError, InvaildSession):
-            loop.run_until_complete(lib.database.close_all())
-            loop.stop()
-            loop.close()
-            del loop, bcc, scheduler, app, plugins, ctx
+    bcc = Broadcast(loop=loop)
+    con.set_bcc(bcc)
+    scheduler = GraiaScheduler(loop, bcc)
+    db = lib.database.Database()
+    loop.run_until_complete(lib.permission.open_perm_db())
+    app = GraiaMiraiApplication(
+        broadcast=bcc, connect_info=session, logger=cast(AbstractLogger, logger)
+    )
+    lib.command.initialize(bcc)
+    saya = Saya(bcc)
+    saya.install_behaviours(BroadcastBehaviour(bcc))
+    saya.install_behaviours(GraiaSchedulerBehaviour(scheduler))
+    with saya.module_context():
+        plugins = lib.plugin.load_plugins(saya)
+    try:
+        app.launch_blocking()
+    except (asyncio.exceptions.CancelledError, InvaildSession):
+        loop.run_until_complete(db.close())
+        loop.stop()
+        loop.close()
+        del loop, bcc, scheduler, app, plugins, db
     con.stop()

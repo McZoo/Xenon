@@ -11,7 +11,6 @@ lib - Xenon 库的基础
     database
     command
     permission
-    dependency
     plugin
     utils
     path

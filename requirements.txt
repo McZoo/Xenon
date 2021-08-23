@@ -8,7 +8,7 @@ croniter
 graia-application-mirai == 0.19.2
 graia-broadcast == 0.8.11
 graia-scheduler == 0.0.4
-graia-saya == 0.0.10
+graia-saya == 0.0.9
 sphinx
 sphinx-rtd-theme
 recommonmark

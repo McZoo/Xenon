@@ -7,46 +7,48 @@ import json
 from secrets import choice
 
 from graia.application import MessageChain
-from graia.application.message.elements.internal import At, Plain
+from graia.application.context import application
+from graia.application.message.elements.internal import Plain
+from graia.saya import Saya, Channel
+from graia.saya.builtins.broadcast import ListenerSchema
+from graia.scheduler.saya import SchedulerSchema
 
 import lib
 from lib import path
 from lib.command import CommandEvent
 
-plugin_spec = lib.plugin.XenonPluginSpec(
-    lib.Version(1, 0, 0),
-    "daily_poem",
-    "BlueGlassBlock",
-    "自动推送”每日诗词“至已注册的群\n"
-    ".poem_enable 在本群启用\n"
-    ".poem_disable 在本群禁用\n"
-    ".poem_query 查询本群历史上的今天启用状态",
-)
+__version__ = "1.0.0"
+__plugin_name__ = "daily_poem"
+__author__ = "BlueGlassBlock"
+__plugin_doc__ = """\
+自动推送”每日诗词“至已注册的群
+.poem_enable 在本群启用
+.poem_disable 在本群禁用
+.poem_query 查询本群历史上的今天启用状态
+"""
 
-
-async def main(ctx: lib.XenonContext):
-    """
-    the main of the plugin
-    :param ctx: XenonContext
-    """
-    db_cur = await lib.database.open_db(
-        "daily_poem_cfg", "(id INTEGER PRIMARY KEY, state INTEGER)"
-    )
-    data_fp = open(path.join(path.plugin, "daily_poem", "poems.json"), "r")
+saya = Saya.current()
+channel = Channel.current()
+db = lib.database.Database.current()
+with open(path.join(path.plugin, "daily_poem", "poems.json"), "r") as data_fp:
     data = json.load(data_fp)
-    data_fp.close()
 
-    @ctx.bcc.receiver(CommandEvent)
-    async def configure(event: CommandEvent):
-        """
-        Configure the plugin
-        :param event: CommandEvent
-        """
-        if (
-            event.group
-            and event.perm_lv >= lib.permission.OPERATOR
-            and event.command in (".poem_enable", ".poem_disable", ".poem_query")
-        ):
+
+@channel.use(ListenerSchema(listening_events=[CommandEvent]))
+async def configure(event: CommandEvent):
+    """
+    Configure the plugin
+    :param event: CommandEvent
+    """
+    if (
+        event.group
+        and event.perm_lv >= lib.permission.OPERATOR
+        and event.command in (".poem_enable", ".poem_disable", ".poem_query")
+    ):
+        db_cur = await db.open(
+            "daily_poem_cfg", "(id INTEGER PRIMARY KEY, state INTEGER)"
+        )
+        async with db_cur:
             if event.command == ".poem_enable":
                 await db_cur.execute(
                     "INSERT INTO daily_poem_cfg VALUES (?, ?) "
@@ -84,20 +86,22 @@ async def main(ctx: lib.XenonContext):
                 reply = f"\n本群的每日诗词启用状态：{bool(cfg)}"
             else:
                 reply = "命令不存在！"
-            await event.send_result(
-                ctx, MessageChain.create([At(event.user), Plain(reply)])
-            )
+            await event.send_result(MessageChain.create([Plain(reply)]))
 
-    @ctx.scheduler.schedule(lib.utils.crontab_iter("15 6 * * *"))
-    async def post_daily_poem():
-        """
-        Post content to enabled groups on 6:15
-        """
+
+@channel.use(SchedulerSchema(lib.utils.crontab_iter("15 6 * * *")))
+async def post_daily_poem():
+    """
+    Post content to enabled groups on 6:15
+    """
+    db_cur = await db.open("daily_poem_cfg", "(id INTEGER PRIMARY KEY, state INTEGER)")
+    async with db_cur:
         groups = await (
             await db_cur.execute("select id FROM daily_poem_cfg WHERE state = 1")
         ).fetchall()
+        app = application.get()
         groups = [i[0] for i in groups]
         today_poem = choice(data)
         for group in groups:
             msg = f"{today_poem[2]}——{today_poem[0]}：{today_poem[1]}\n{today_poem[3]}"
-            await ctx.app.sendGroupMessage(group, MessageChain.create([Plain(msg)]))
+            await app.sendGroupMessage(group, MessageChain.create([Plain(msg)]))

@@ -6,47 +6,48 @@ import json
 from datetime import datetime
 
 from graia.application import MessageChain
+from graia.application.context import application
 from graia.application.message.elements.internal import At, Plain
+from graia.saya import Channel, Saya
+from graia.saya.builtins.broadcast import ListenerSchema
+from graia.scheduler.saya import SchedulerSchema
 
 import lib
 from lib import path
 from lib.command import CommandEvent
 
-plugin_spec = lib.plugin.XenonPluginSpec(
-    lib.Version(0, 1, 0),
-    "history_today",
-    "BlueGlassBlock",
+__version__ = "1.0.0"
+__plugin_name__ = "history_today"
+__author__ = "BlueGlassBlock"
+__plugin_doc__ = """\
     "自动推送”历史上的今天“至已注册的群\n"
     ".history_enable 在本群启用\n"
     ".history_disable 在本群禁用\n"
     ".history_query 查询本群历史上的今天启用状态",
-)
+"""
 
-
-async def main(ctx: lib.XenonContext):
-    """
-    the main of the plugin
-    :param ctx: XenonContext
-    """
-    db_cur = await lib.database.open_db(
-        "history_today_cfg", "(id INTEGER PRIMARY KEY, state INTEGER)"
-    )
-    data_fp = open(path.join(path.plugin, "history_today", "history.json"), "r")
+saya = Saya.current()
+channel = Channel.current()
+db = lib.database.Database.current()
+with open(path.join(path.plugin, "history_today", "history.json"), "r") as data_fp:
     data = json.load(data_fp)
-    data_fp.close()
 
-    @ctx.bcc.receiver(CommandEvent)
-    async def configure(event: CommandEvent):
-        """
-        Configure the plugin
-        :param event: CommandEvent
-        """
-        if (
-            event.group
-            and event.perm_lv >= lib.permission.OPERATOR
-            and event.command
-            in (".history_enable", ".history_disable", ".history_query")
-        ):
+
+@channel.use(ListenerSchema(listening_events=[CommandEvent]))
+async def configure(event: CommandEvent):
+    """
+    Configure the plugin
+    :param event: CommandEvent
+    """
+    if (
+        event.group
+        and event.perm_lv >= lib.permission.OPERATOR
+        and event.command in (".history_enable", ".history_disable", ".history_query")
+    ):
+        db_cur = await db.open(
+            "history_today_cfg", "(id INTEGER PRIMARY KEY, state INTEGER)"
+        )
+        async with db_cur:
             if event.command == ".history_enable":
                 await db_cur.execute(
                     "INSERT INTO history_today_cfg VALUES (?, ?) "
@@ -84,20 +85,24 @@ async def main(ctx: lib.XenonContext):
                 reply = f"\n本群的历史上的今天启用状态：{bool(cfg)}"
             else:
                 reply = "命令不存在！"
-            await event.send_result(
-                ctx, MessageChain.create([At(event.user), Plain(reply)])
-            )
+            await event.send_result(MessageChain.create([At(event.user), Plain(reply)]))
 
-    @ctx.scheduler.schedule(lib.utils.crontab_iter("30 6 * * *"))
-    async def post_history_today():
-        """
-        Post content to enabled groups on 6:30
-        """
+
+@channel.use(SchedulerSchema(lib.utils.crontab_iter("15 6 * * *")))
+async def post_history_today():
+    """
+    Post content to enabled groups on 6:30
+    """
+    db_cur = await db.open(
+        "history_today_cfg", "(id INTEGER PRIMARY KEY, state INTEGER)"
+    )
+    async with db_cur:
         curr_time = datetime.now()
         groups = await (
             await db_cur.execute("select id FROM history_today_cfg WHERE state = 1")
         ).fetchall()
         groups = [i[0] for i in groups]
+        app = application.get()
         for group in groups:
             entries = data[str(curr_time.month)][str(curr_time.day)]["data"]
             msg = (
@@ -109,4 +114,4 @@ async def main(ctx: lib.XenonContext):
                 )
                 + "\n".join(f"{e[0]}年，{e[1]}" for e in entries)
             )
-            await ctx.app.sendGroupMessage(group, MessageChain.create([Plain(msg)]))
+            await app.sendGroupMessage(group, MessageChain.create([Plain(msg)]))

@@ -1,4 +1,3 @@
-# coding=utf-8
 """
-The package base of Xenon's plugin
+Xenon 插件目录
 """

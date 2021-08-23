@@ -4,54 +4,59 @@ Xenon
 回声洞
 灵感来源于PCL2内测群
 """
-from graia.application import Member, MessageChain
+from graia.application import Member, MessageChain, GraiaMiraiApplication
 from graia.application.message.elements.internal import Plain
+from graia.saya import Saya, Channel
+from graia.saya.builtins.broadcast import ListenerSchema
 
 import lib
 from lib import permission
 from lib.command import CommandEvent
 from .entry_parser import to_list, to_text
 
-plugin_spec = lib.plugin.XenonPluginSpec(
-    lib.Version(2, 0, 0),
-    "cave",
-    "BlueGlassBlock",
-    "回声洞（不要与PCL2的回声洞混淆了！）\n"
-    ".cave： 从回声洞抽取一条语录\n"
-    ".cave-a MESSAGE： 向回声洞添加一条语录\n"
-    ".cave-v ID：查看回声洞指定ID的语录\n"
-    ".cave-d ID：删除回声洞指定ID的语录\n"
-    ".cave-count：统计回声洞条数",
-)
+__version__ = "2.0.0"
+__plugin_name__ = "cave"
+__author__ = "BlueGlassBlock"
+__plugin_doc__ = """\
+回声洞（不要与PCL2的回声洞混淆了！）
+.cave： 从回声洞抽取一条语录
+.cave-a MESSAGE： 向回声洞添加一条语录
+.cave-v ID：查看回声洞指定ID的语录
+.cave-d ID：删除回声洞指定ID的语录
+.cave-count：统计回声洞条数"""
+
+saya = Saya.current()
+channel = Channel.current()
+db = lib.database.Database.current()
 
 
-async def main(ctx: lib.XenonContext):
-    """
-    主函数
-    :param ctx: XenonContext
-    :return: None
-    """
-    db_cur = await lib.database.open_db(
-        "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"
-    )
+@channel.use(ListenerSchema(listening_events=[CommandEvent]))
+async def cave(event: CommandEvent):
 
-    @ctx.bcc.receiver(CommandEvent)
-    async def cave(event: CommandEvent):
-        if event.command == ".cave" and event.perm_lv >= permission.USER:
+    if event.command == ".cave" and event.perm_lv >= permission.USER:
+        db_cur = await db.open(
+            "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"
+        )
+        async with db_cur:
             entry = await (
                 await db_cur.execute(
                     "SELECT * FROM cave ORDER BY RANDOM() DESC LIMIT 1"
                 )
             ).fetchone()
             msg = f"回声洞 #{entry[0]} by {entry[1]}\n"
-            await event.send_result(ctx, await to_list(entry[2], [Plain(msg)]))
+            await event.send_result(await to_list(entry[2], [Plain(msg)]))
 
-    @ctx.bcc.receiver(CommandEvent)
-    async def cave_mgmt(event: CommandEvent):
-        if event.command.startswith(".cave-") and event.perm_lv >= permission.FRIEND:
+
+@channel.use(ListenerSchema(listening_events=[CommandEvent]))
+async def cave_mgmt(app: GraiaMiraiApplication, event: CommandEvent):
+    if event.command.startswith(".cave-") and event.perm_lv >= permission.FRIEND:
+        db_cur = await db.open(
+            "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"
+        )
+        async with db_cur:
             cmd = event.command.removeprefix(".cave-")
             if cmd.startswith("a ") and event.group:
-                member: Member = await ctx.app.getMember(event.group, event.user)
+                member: Member = await app.getMember(event.group, event.user)
                 msg_id = (
                     await (
                         await db_cur.execute(
@@ -106,4 +111,4 @@ async def main(ctx: lib.XenonContext):
                 reply = MessageChain.create([Plain(f"Xenon 回声洞：\n共有{cnt[0]}条记录")])
             else:
                 reply = "命令无效"
-            await event.send_result(ctx, reply)
+            await event.send_result(reply)

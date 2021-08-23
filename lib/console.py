@@ -7,13 +7,15 @@ import queue
 import threading
 import time
 from typing import Optional
+from concurrent.futures import ThreadPoolExecutor
 
 from graia.application.event.lifecycle import ApplicationLaunched
+from graia.broadcast import Broadcast
+from loguru import logger
 from prompt_toolkit import PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
 
 import lib
-from lib import XenonContext
 from lib import permission
 from lib.command import CommandEvent
 
@@ -23,15 +25,25 @@ class Console(threading.Thread):
     Xenon 的控制台线程。
     """
 
+    __current: Optional["Console"] = None
+
     def __init__(self):
         threading.Thread.__init__(self, name="ConsoleThread")
         # NEVER set daemon to True
         # NEVER
+        self.loop_executor = ThreadPoolExecutor(
+            5, thread_name_prefix="ConsoleLoopThread"
+        )
         self.out_queue: queue.Queue[str] = queue.Queue()
         self.in_queue: queue.Queue[str] = queue.Queue()
         self.__running: bool = False
-        self.loop: Optional[asyncio.AbstractEventLoop] = None
-        self.ctx: Optional[XenonContext] = None
+        self.bcc: Optional[Broadcast] = None
+        self.loop: Optional[asyncio.AbstractEventLoop] = asyncio.new_event_loop()
+        self.loop.set_default_executor(self.loop_executor)
+        self.__class__.__current = self
+
+    def __del__(self):
+        self.__class__.__current = None
 
     async def command_poster(self):
         """
@@ -44,10 +56,8 @@ class Console(threading.Thread):
             except queue.Empty:
                 pass
             else:
-                if self.ctx.bcc:
-                    self.ctx.bcc.postEvent(
-                        CommandEvent("local", in_str, permission.ADMIN)
-                    )
+                if self.bcc:
+                    self.bcc.postEvent(CommandEvent("local", in_str, permission.ADMIN))
 
     def stop(self):
         """
@@ -58,6 +68,7 @@ class Console(threading.Thread):
         self.output("Press ENTER to continue...")
         self.__running = False
         self.join()
+        self.__class__.__current = None
 
     def input(self) -> str:
         """
@@ -76,15 +87,14 @@ class Console(threading.Thread):
         """
         self.out_queue.put(value)
 
-    def set_ctx(self, ctx: XenonContext):
+    def set_bcc(self, bcc: Broadcast):
         """
-        设置 XenonContext，并向其中的 BroadcastControl 注册命令事件发送的函数
+        注册发送命令事件的函数
 
-        :param ctx: XenonContext 的实例
+        :param bcc: Broadcast 的实例
         """
-        self.ctx = ctx
-
-        self.ctx.bcc.receiver(ApplicationLaunched)(self.command_poster)
+        self.bcc = bcc
+        bcc.receiver(ApplicationLaunched)(self.command_poster)
 
     async def _a_input(self):
         p_session = PromptSession()
@@ -93,6 +103,7 @@ class Console(threading.Thread):
             with patch_stdout():
                 curr_input = await p_session.prompt_async("> ")
             self.in_queue.put(curr_input)
+            logger.info(f"Command: {curr_input}")
 
     async def _a_output(self):
         while self.__running or self.out_queue.qsize():
@@ -118,8 +129,15 @@ class Console(threading.Thread):
         """
         self.__running = True
         self.out_queue.put("Starting console......")
-        self.loop = asyncio.new_event_loop()
         self.loop.run_until_complete(self._async_run())
+
+    @classmethod
+    def current(cls):
+        """
+
+        :return: 当前控制台对象，没有则为 None
+        """
+        return cls.__current
 
 
 if __name__ == "__main__":
