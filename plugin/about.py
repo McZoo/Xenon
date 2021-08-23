@@ -50,7 +50,9 @@ async def xenon_help(event: CommandEvent):
                 "Xenon 帮助： ",
                 f"{name} by {spec.author}" if spec.author else f"{name}",
                 f"版本：{spec.version}" if spec.version else "",
-                f"依赖项：{list(i.name for i in spec.dependency)}" if spec.dependency else "",
+                f"依赖项：{list(i.name for i in spec.dependency)}"
+                if spec.dependency
+                else "",
                 spec.doc,
             ]
         else:
