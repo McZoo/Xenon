@@ -4,6 +4,7 @@ Xenon 的工具库，封装了一些有用的函数
 """
 from datetime import datetime
 from os.path import join
+from types import FunctionType
 from typing import Iterable, Optional
 
 from croniter import croniter

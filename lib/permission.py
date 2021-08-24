@@ -4,12 +4,11 @@ Xenon 权限管理
 """
 from typing import Optional, Union
 
-from aiosqlite import Cursor
 from graia.application import Friend, Member
 
 from . import database
 
-cursor: Optional[Cursor] = None
+cursor: Optional[database.Cursor] = None
 
 ADMIN = 50
 OPERATOR = 40
@@ -36,9 +35,8 @@ async def open_perm_db():
     因为打开数据库是异步的，所以需要作为协程函数调用
     """
     global cursor
-    cursor = await database.Database.current().open(
-        "permission", "(id INTEGER PRIMARY KEY," "level INTEGER)"
-    )
+    db = database.Database.current()
+    cursor = await db.open("permission", "(id INTEGER PRIMARY KEY," "level INTEGER)")
 
 
 async def get_perm(user: Union[Friend, Member, int]) -> int:
@@ -51,11 +49,9 @@ async def get_perm(user: Union[Friend, Member, int]) -> int:
     if type(user) in (Friend, Member):
         user = user.id
     user: int
-    res = await (
-        await cursor.execute("SELECT level FROM permission where id = ?", (user,))
-    ).fetchone()
+    res = await (await cursor.select("level", (user,), "id = ?")).fetchone()
     if res is None:
-        await cursor.execute("INSERT INTO permission VALUES (?, ?)", (user, DEFAULT))
+        await cursor.insert((user, DEFAULT))
         return DEFAULT
     return res[0]
 
@@ -70,11 +66,4 @@ async def set_perm(user: Union[Friend, Member, int], level: int) -> None:
     if type(user) in (Friend, Member):
         user = user.id
     user: int
-    await cursor.execute(
-        "INSERT INTO permission VALUES (?, ?) "
-        "ON CONFLICT (id) DO UPDATE SET level = excluded.level",
-        (
-            user,
-            level,
-        ),
-    )
+    await cursor.insert((user, level))

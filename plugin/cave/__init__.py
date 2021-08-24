@@ -32,16 +32,13 @@ db = lib.database.Database.current()
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent]))
 async def cave(event: CommandEvent):
-
     if event.command == ".cave" and event.perm_lv >= permission.USER:
         db_cur = await db.open(
             "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"
         )
         async with db_cur:
             entry = await (
-                await db_cur.execute(
-                    "SELECT * FROM cave ORDER BY RANDOM() DESC LIMIT 1"
-                )
+                await db_cur.select("*", group_by="RANDOM() DESC", extra="LIMIT 1")
             ).fetchone()
             msg = f"回声洞 #{entry[0]} by {entry[1]}\n"
             await event.send_result(await to_list(entry[2], [Plain(msg)]))
@@ -59,15 +56,16 @@ async def cave_mgmt(app: GraiaMiraiApplication, event: CommandEvent):
                 member: Member = await app.getMember(event.group, event.user)
                 msg_id = (
                     await (
-                        await db_cur.execute(
-                            "SELECT MIN(id) + 1 FROM cave WHERE "
-                            "id + 1 NOT IN (SELECT id FROM cave)"
+                        await db_cur.select(
+                            "MIN(id) +1",
+                            condition="id + 1 NOT IN (SELECT id FROM cave)",
                         )
-                    ).fetchone()
-                )[0]
+                    )
+                ).fetchone()[0]
+                if msg_id is None:
+                    msg_id = 1
                 chain = event.msg_chain.asSendable().asMerged()
-                await db_cur.execute(
-                    "INSERT INTO cave VALUES (?, ?, ?)",
+                await db_cur.insert(
                     (
                         msg_id,
                         member.name,
@@ -79,24 +77,20 @@ async def cave_mgmt(app: GraiaMiraiApplication, event: CommandEvent):
                 try:
                     target_id = int(cmd.removeprefix("d "))
                     res = await (
-                        await db_cur.execute(
-                            "SELECT * FROM cave WHERE id = ?", (target_id,)
-                        )
+                        await db_cur.select("*", (target_id,), "id = ?")
                     ).fetchone()
                     if not res:
                         raise ValueError(f"#{target_id}不存在")
                 except ValueError as e:
                     reply = MessageChain.create([Plain(f"内容错误：{e.args}")])
                 else:
-                    await db_cur.execute("DELETE FROM cave WHERE id = ?", (target_id,))
+                    await db_cur.delete((target_id,), "id = ?")
                     reply = await to_list(res[2], [Plain(f"已删除#{target_id}：")])
             elif cmd.startswith("v "):
                 try:
                     target_id = int(cmd.removeprefix("v "))
                     res = await (
-                        await db_cur.execute(
-                            "SELECT * FROM cave WHERE id = ?", (target_id,)
-                        )
+                        await db_cur.select("*", (target_id,), "id = ?")
                     ).fetchone()
                     if not res:
                         raise ValueError(f"#{target_id}不存在")
@@ -105,9 +99,7 @@ async def cave_mgmt(app: GraiaMiraiApplication, event: CommandEvent):
                 else:
                     reply = await to_list(res[2], [Plain(f"#{target_id} by {res[1]}：")])
             elif cmd == "count":
-                cnt = await (
-                    (await db_cur.execute("SELECT COUNT() FROM cave")).fetchone()
-                )
+                cnt = await ((await db_cur.select("COUNT()")).fetchone())
                 reply = MessageChain.create([Plain(f"Xenon 回声洞：\n共有{cnt[0]}条记录")])
             else:
                 reply = "命令无效"

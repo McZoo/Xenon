@@ -50,31 +50,24 @@ async def configure(event: CommandEvent):
         )
         async with db_cur:
             if event.command == ".poem_enable":
-                await db_cur.execute(
-                    "INSERT INTO daily_poem_cfg VALUES (?, ?) "
-                    "ON CONFLICT (id) DO UPDATE SET state = excluded.state",
+                await db_cur.insert(
                     (
                         event.group.id,
                         1,
-                    ),
+                    )
                 )
                 reply = "\n成功启用每日诗词"
             elif event.command == ".poem_disable":
-                await db_cur.execute(
-                    "INSERT INTO daily_poem_cfg VALUES (?, ?) "
-                    "ON CONFLICT (id) DO UPDATE SET state = excluded.state",
+                await db_cur.insert(
                     (
                         event.group.id,
                         0,
-                    ),
+                    )
                 )
                 reply = "\n成功关闭每日诗词"
             elif event.command == ".poem_query":
                 res = await (
-                    await db_cur.execute(
-                        "SELECT state FROM daily_poem_cfg where id = ?",
-                        (event.group.id,),
-                    )
+                    await db_cur.select("state", (event.group.id,), "id = ?")
                 ).fetchone()
                 if res is None:
                     await db_cur.execute(
@@ -96,9 +89,7 @@ async def post_daily_poem():
     """
     db_cur = await db.open("daily_poem_cfg", "(id INTEGER PRIMARY KEY, state INTEGER)")
     async with db_cur:
-        groups = await (
-            await db_cur.execute("select id FROM daily_poem_cfg WHERE state = 1")
-        ).fetchall()
+        groups = await (await db_cur.select(id, condition="state = 1")).fetchall()
         app = application.get()
         groups = [i[0] for i in groups]
         today_poem = choice(data)

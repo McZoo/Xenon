@@ -24,7 +24,7 @@ copyright = "2021, McZoo Development Team"  # noqa
 author = "McZoo Development Team"
 
 # The full version, including alpha/beta/rc tags
-release = "0.4.0-exp"
+release = "0.4.1-beta"
 
 
 # -- General configuration ---------------------------------------------------
