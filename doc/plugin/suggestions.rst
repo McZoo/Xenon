@@ -30,6 +30,9 @@ Xenon 提供了 :class:`lib.database.Database` 对象作为数据库入口。
 
 如果可能，Xenon 会自动新建表，并通过传入的字段完成表的定义。
 
+:func:`lib.database.Cursor.select` 与 :func:`lib.database.Cursor.insert` 与 :func:`lib.database.Cursor.insert`
+可以用于方便地查看，修改数据库
+
 .. code-block:: python
 
     from lib.database import Database
@@ -40,4 +43,7 @@ Xenon 提供了 :class:`lib.database.Database` 对象作为数据库入口。
     @channel.use(ListenerSchema(listening_events=[CommandEvent]))
     async def foo(event: CommandEvent):
         db_cur = await db.open("foo", "(id INTEGER PRIMARY KEY, bar TEXT)")
+        async with db_cur:
+            await db_cur.insert((ID, CONTENT)) # 可以直接插入
+            await db_cur.select("*", (CONTENT,), condition="bar = ?")
 

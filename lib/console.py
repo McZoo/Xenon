@@ -102,8 +102,9 @@ class Console(threading.Thread):
             await asyncio.sleep(0.01)
             with patch_stdout():
                 curr_input = await p_session.prompt_async("> ")
-            self.in_queue.put(curr_input)
-            logger.info(f"Command: {curr_input}")
+            if curr_input:
+                self.in_queue.put(curr_input)
+                logger.info(f"Command: {curr_input}")
 
     async def _a_output(self):
         while self.__running or self.out_queue.qsize():

@@ -49,35 +49,31 @@ async def configure(event: CommandEvent):
         )
         async with db_cur:
             if event.command == ".history_enable":
-                await db_cur.execute(
-                    "INSERT INTO history_today_cfg VALUES (?, ?) "
-                    "ON CONFLICT (id) DO UPDATE SET state = excluded.state",
+                await db_cur.insert(
                     (
                         event.group.id,
                         1,
-                    ),
+                    )
                 )
                 reply = "\n成功启用历史上的今天"
             elif event.command == ".history_disable":
-                await db_cur.execute(
-                    "INSERT INTO history_today_cfg VALUES (?, ?) "
-                    "ON CONFLICT (id) DO UPDATE SET state = excluded.state",
+                await db_cur.insert(
                     (
                         event.group.id,
                         0,
-                    ),
+                    )
                 )
                 reply = "\n成功关闭历史上的今天"
             elif event.command == ".history_query":
                 res = await (
-                    await db_cur.execute(
-                        "SELECT state FROM history_today_cfg where id = ?",
-                        (event.group.id,),
-                    )
+                    await db_cur.select("state", (event.group.id,), "id = ?")
                 ).fetchone()
                 if res is None:
-                    await db_cur.execute(
-                        "INSERT INTO history_today_cfg VALUES (?, ?)", (event.group, 0)
+                    await db_cur.insert(
+                        (
+                            event.group.id,
+                            0,
+                        )
                     )
                     cfg: int = 0
                 else:
@@ -98,9 +94,7 @@ async def post_history_today():
     )
     async with db_cur:
         curr_time = datetime.now()
-        groups = await (
-            await db_cur.execute("select id FROM history_today_cfg WHERE state = 1")
-        ).fetchall()
+        groups = await (await db_cur.select(id, condition="state = 1")).fetchall()
         groups = [i[0] for i in groups]
         app = application.get()
         for group in groups:
