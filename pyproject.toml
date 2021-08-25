@@ -18,7 +18,7 @@ croniter = "^0.3.37"
 loguru = "^0.5.3"
 
 [tool.poetry.dev-dependencies]
-mcstatus = "^6.4.0"
+mcstatus = "^6.5.0"
 Sphinx = "^4.1.2"
 sphinx-rtd-theme = "^1.0.0rc1"
 recommonmark = "^0.7.1"

@@ -2,9 +2,9 @@
 """
 Xenon 的工具库，封装了一些有用的函数
 """
+import logging
 from datetime import datetime
 from os.path import join
-from types import FunctionType
 from typing import Iterable, Optional
 
 from croniter import croniter
@@ -14,6 +14,23 @@ from prompt_toolkit.patch_stdout import StdoutProxy
 from pydantic import AnyHttpUrl
 
 from . import config, console, path
+
+
+class LoguruInterceptHandler(logging.Handler):
+    def emit(self, record):
+        # Get corresponding Loguru level if it exists
+        try:
+            level = logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+
+        # Find caller from where originated the logged message
+        frame, depth = logging.currentframe(), 2
+        while frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
 def config_logger():
@@ -32,6 +49,7 @@ def config_logger():
         level="DEBUG",
         rotation="00:00",
     )
+    logging.basicConfig(handlers=[LoguruInterceptHandler()], level=0)
 
 
 class SessionConfig(config.XenonConfig):
