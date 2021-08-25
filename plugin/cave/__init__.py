@@ -23,6 +23,7 @@ __plugin_doc__ = """\
 .cave-a MESSAGE： 向回声洞添加一条语录
 .cave-v ID：查看回声洞指定ID的语录
 .cave-d ID：删除回声洞指定ID的语录
+.cave-s CONTENT: 在回声洞中搜索 CONTENT
 .cave-count：统计回声洞条数"""
 
 saya = Saya.current()
