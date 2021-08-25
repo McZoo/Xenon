@@ -17,7 +17,7 @@ __plugin_name__ = "get_anime_pic"
 __dependency__ = {"aiohttp": "aiohttp"}
 __plugin_doc = """\
 .get_anime_pic：从用户配置的API获取一张图片
-.set_anime_api_pref API_PROVIDER：设置用户的API为 API_PROVIDER
+.set_anime_api API_PROVIDER：设置用户的API为 API_PROVIDER
 API PROVIDER的可用值为：
 { rainchan, lolicon, pic.re,
 waifu.pics/waifu, waifu.pics/neko,
@@ -177,7 +177,7 @@ async def get_anime_pic(event: CommandEvent):
 async def set_anime_api_pref(event: CommandEvent):
     if (
         event.user
-        and event.command.startswith(".set_anime_api_pref")
+        and event.command.startswith(".set_anime_api")
         and event.perm_lv >= lib.permission.FRIEND
         and len(event.command.split(" ")) == 2
     ):
