@@ -7,5 +7,6 @@
     :maxdepth: 2
     :caption: 内容：
 
+    CONTRIBUTE
     CHANGELOG
     ROADMAP

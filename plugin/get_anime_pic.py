@@ -148,13 +148,10 @@ async def get_anime_pic(event: CommandEvent):
         api_cursor = await db.open("anime_pic_db", "(id INTEGER PRIMARY KEY, api TEXT)")
         async with api_cursor:
             res = await (
-                await api_cursor.select("api", (event.user,), "id = ?"
-                )
+                await api_cursor.select("api", (event.user,), "id = ?")
             ).fetchone()
             if res is None:
-                await api_cursor.insert(
-                    (event.user, "rainchan")
-                )
+                await api_cursor.insert((event.user, "rainchan"))
                 pref: str = "rainchan"
             else:
                 pref: str = res[0]

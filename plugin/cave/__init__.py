@@ -4,7 +4,7 @@ Xenon
 回声洞
 灵感来源于PCL2内测群
 """
-from graia.application import Member, MessageChain, GraiaMiraiApplication
+from graia.application import MessageChain
 from graia.application.message.elements.internal import Plain
 from graia.saya import Saya, Channel
 from graia.saya.builtins.broadcast import ListenerSchema
@@ -46,30 +46,31 @@ async def cave(event: CommandEvent):
 
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent]))
-async def cave_mgmt(app: GraiaMiraiApplication, event: CommandEvent):
+async def cave_mgmt(event: CommandEvent):
     if event.command.startswith(".cave-") and event.perm_lv >= permission.FRIEND:
         db_cur = await db.open(
             "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"
         )
         async with db_cur:
             cmd = event.command.removeprefix(".cave-")
-            if cmd.startswith("a ") and event.group:
-                member: Member = await app.getMember(event.group, event.user)
-                msg_id = (
-                    await (
-                        await db_cur.select(
-                            "MIN(id) +1",
-                            condition="id + 1 NOT IN (SELECT id FROM cave)",
-                        )
+            if cmd.startswith("a "):
+                row = await (
+                    await db_cur.select(
+                        "MIN(id) +1",
+                        condition="id + 1 NOT IN (SELECT id FROM cave)",
                     )
-                ).fetchone()[0]
+                ).fetchone()
+                msg_id = row[0]
                 if msg_id is None:
                     msg_id = 1
-                chain = event.msg_chain.asSendable().asMerged()
+                if event.source == "remote":
+                    chain = event.msg_chain.asSendable().asMerged()
+                else:
+                    chain = MessageChain.create([Plain(event.command)])
                 await db_cur.insert(
                     (
                         msg_id,
-                        member.name,
+                        await event.get_operator(),
                         await to_text(chain[(0, len(".cave-a ")) :]),
                     ),
                 )
@@ -108,11 +109,15 @@ async def cave_mgmt(app: GraiaMiraiApplication, event: CommandEvent):
                     await db_cur.select("id", condition=f"name LIKE '%{target}%'")
                 ).fetchall()
                 final_res = set(i[0] for i in msg) | set(i[0] for i in name)  # merge id
-                reply = MessageChain.create([Plain(f"共找到{len(final_res)}条记录：\n"),
-                                             Plain("，".join(f"#{i}" for i in final_res))])
+                reply = MessageChain.create(
+                    [
+                        Plain(f"共找到{len(final_res)}条记录：\n"),
+                        Plain("，".join(f"#{i}" for i in final_res)),
+                    ]
+                )
             elif cmd == "count":
                 cnt = await ((await db_cur.select("COUNT()")).fetchone())
                 reply = MessageChain.create([Plain(f"Xenon 回声洞：\n共有{cnt[0]}条记录")])
             else:
-                reply = "命令无效"
+                reply = MessageChain.create([Plain("命令无效")])
             await event.send_result(reply)

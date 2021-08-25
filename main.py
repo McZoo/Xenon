@@ -14,9 +14,10 @@ from loguru import logger
 import lib
 
 if __name__ == "__main__":
+    lib.utils.config_logger()
+    logger.info(f"Xenon {lib.__version__}")
     con = lib.console.Console()
     con.start()
-    lib.utils.config_logger()
     lib.state = "RUN"
     loop = asyncio.new_event_loop()
     session = lib.utils.get_session(con)

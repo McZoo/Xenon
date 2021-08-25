@@ -8,10 +8,20 @@ from importlib.util import find_spec
 from types import ModuleType
 from typing import Dict, Optional, List, NamedTuple
 
+from graia.broadcast import RequirementCrashed
+from loguru import logger
 from pydantic import BaseModel
 from graia.saya import Saya
 
 from lib import path
+
+
+class DependencyBroken(Exception):
+    """
+    指示插件的依赖已损坏，用于在插件的 `__raise__` 属性上使用
+    """
+
+    pass
 
 
 class DependencyEntry(BaseModel):
@@ -66,6 +76,9 @@ class PluginSpec(BaseModel):
                 entry_list.append(entry)
             data["dependency"] = [DependencyEntry(*t) for t in dependency_dict.items()]
             data["dependency_matched"] = all(data["dependency"])
+            if hasattr(module, "__raise__"):
+                if isinstance(module.__raise__, DependencyBroken):
+                    data["dependency_matched"] = False
         super().__init__(**data)
 
 
@@ -119,8 +132,10 @@ def load_plugins(saya: Saya) -> PluginContainer:
         try:
             saya.require(import_path)
             curr_plugin = importlib.import_module(import_path)
-        except ImportError:
+        except Exception as e:
             container.broken.append(name)
+            logger.error(f"An error occurred when loading {name}:")
+            logger.error(e)
         else:
             spec = PluginSpec(curr_plugin)
             info = PluginInfo(name, spec, curr_plugin)

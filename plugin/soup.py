@@ -30,9 +30,7 @@ channel = Channel.current()
 async def dice(app: GraiaMiraiApplication, event: CommandEvent):
     if event.user and event.command in ".soup":
         async with aiohttp.request(
-                "GET", "http://api.btstu.cn/yan/api.php"
+            "GET", "http://api.btstu.cn/yan/api.php"
         ) as response:
             json_str = await response.text()
-        await event.send_result(
-            MessageChain.create([Plain(json_str)])
-        )
+        await event.send_result(MessageChain.create([Plain(json_str)]))

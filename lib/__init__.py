@@ -2,7 +2,7 @@
 """
 Xenon库的基础,提供的 `state` 属性标注了 Xenon 的运行状态
 """
-__version__ = "0.4.2-beta"
+__version__ = "0.4.3-beta"
 
 from . import (
     command,

@@ -77,6 +77,20 @@ class CommandEvent(MiraiEvent):
             receipt = await app.sendFriendMessage(self.user, message)
         return receipt
 
+    async def get_operator(self):
+        """
+        返回本事件发送者的名字
+
+        :return: 字符串，名字
+        """
+        app: GraiaMiraiApplication = application.get()
+        if self.source == "local":
+            return "Console"
+        elif self.group:
+            return (await app.getMember(self.group, self.user)).name
+        else:
+            return (await app.getFriend(self.user)).nickname
+
 
 def initialize(bcc: Broadcast):
     """
