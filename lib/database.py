@@ -21,7 +21,7 @@ class Cursor(aiosqlite.Cursor):
         content: str,
         values: tuple = (),
         condition: str = "",
-        group_by: str = "",
+        order_by: str = "",
         extra: str = "",
     ) -> "Cursor":
         """
@@ -29,16 +29,16 @@ class Cursor(aiosqlite.Cursor):
 
         :param values: 替换 `?` 的 元组
         :param content: 查询的字段
-        :param condition: 条件，代替原有在 `WHERE` 后的内容
-        :param group_by: 分组条件，代替原有在 `GROUP BY` 之后的内容
+        :param condition: 筛选条件，代替原有在 `WHERE` 后的内容
+        :param order_by: 排序条件，代替原有在 `GROUP BY` 之后的内容
         :param extra: 额外部分，如 `LIMIT 1` 等
         :return: 原光标对象
         """
         base = f"SELECT {content} FROM {self.table}"
         if condition:
             base = " ".join((base, f"WHERE {condition}"))
-        if group_by:
-            base = " ".join((base, f"GROUP BY {group_by}"))
+        if order_by:
+            base = " ".join((base, f"ORDER BY {order_by}"))
         if extra:
             base = " ".join((base, f"{extra}"))
         await self.execute(base, values)
