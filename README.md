@@ -7,7 +7,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.9-informational)](https://docs.python.org/zh-cn/3.9/)
 [![Code Style](https://img.shields.io/badge/code%20style-black-black)](http://github.com/psf/black)
 [![Documentation Status](https://readthedocs.org/projects/xenon-bot/badge/?version=latest)](https://xenon-bot.readthedocs.io/zh_CN/latest/?badge=latest)
-![Version](https://img.shields.io/badge/version-0.4.1--beta-brightgreen)
+![Version](https://img.shields.io/badge/version-0.4.2--beta-brightgreen)
 
 ## 许可证
 Xenon 在与 [Mirai](https://github.com/mamoe/mirai) 和

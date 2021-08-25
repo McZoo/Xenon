@@ -38,7 +38,7 @@ async def cave(event: CommandEvent):
         )
         async with db_cur:
             entry = await (
-                await db_cur.select("*", group_by="RANDOM() DESC", extra="LIMIT 1")
+                await db_cur.select("*", order_by="RANDOM() DESC", extra="LIMIT 1")
             ).fetchone()
             msg = f"回声洞 #{entry[0]} by {entry[1]}\n"
             await event.send_result(await to_list(entry[2], [Plain(msg)]))
@@ -98,6 +98,17 @@ async def cave_mgmt(app: GraiaMiraiApplication, event: CommandEvent):
                     reply = MessageChain.create([Plain(f"内容错误：{e.args}")])
                 else:
                     reply = await to_list(res[2], [Plain(f"#{target_id} by {res[1]}：")])
+            elif cmd.startswith("s "):
+                target = cmd.removeprefix("s ")
+                msg = await (
+                    await db_cur.select("id", condition=f"message LIKE '%{target}%'")
+                ).fetchall()
+                name = await (
+                    await db_cur.select("id", condition=f"name LIKE '%{target}%'")
+                ).fetchall()
+                final_res = set(i[0] for i in msg) | set(i[0] for i in name)  # merge id
+                reply = MessageChain.create([Plain(f"共找到{len(final_res)}条记录：\n"),
+                                             Plain("，".join(f"#{i}" for i in final_res))])
             elif cmd == "count":
                 cnt = await ((await db_cur.select("COUNT()")).fetchone())
                 reply = MessageChain.create([Plain(f"Xenon 回声洞：\n共有{cnt[0]}条记录")])
