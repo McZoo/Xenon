@@ -1,7 +1,7 @@
 # coding=utf-8
 from typing import Literal, Optional
 
-from graia.application import Friend, Group, Member, GraiaMiraiApplication
+from graia.application import Friend, Group, Member, GraiaMiraiApplication, BotMessage
 from graia.application.context import application
 from graia.application.event import EmptyDispatcher
 from graia.application.event.messages import FriendMessage, GroupMessage, TempMessage
@@ -60,20 +60,22 @@ class CommandEvent(MiraiEvent):
             group=group,
         )
 
-    async def send_result(self, message: MessageChain):
+    async def send_result(self, message: MessageChain) -> Optional[BotMessage]:
         """
         依据传入的参数自动发送结果至合适的端
 
         :param message: 要发送的消息，local端的消息会自动 asDisplay() 处理
+        :return receipt: BotMessage 或 None，可用于撤回消息
         """
         app: GraiaMiraiApplication = application.get()
         if self.source == "local":
             logger.info(message.asDisplay())
+            receipt = None
         elif self.group:
-            await app.sendGroupMessage(self.group, message)
+            receipt = await app.sendGroupMessage(self.group, message)
         else:
-            await app.sendFriendMessage(self.user, message)
-        return
+            receipt = await app.sendFriendMessage(self.user, message)
+        return receipt
 
 
 def initialize(bcc: Broadcast):

@@ -50,7 +50,7 @@ async def stopper(app: GraiaMiraiApplication, event: CommandEvent):
 
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent]))
-async def update_permission(app: GraiaMiraiApplication, event: CommandEvent):
+async def update_permission(event: CommandEvent):
     if (
         event.command.startswith(".set-perm")
         and len(event.command.split(" ")) == 3
@@ -72,7 +72,7 @@ async def update_permission(app: GraiaMiraiApplication, event: CommandEvent):
 
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent]))
-async def query_permission(app: GraiaMiraiApplication, event: CommandEvent):
+async def query_permission(event: CommandEvent):
     if (
         event.command.startswith(".query-perm")
         and len(event.command.split(" ")) == 2
