@@ -148,13 +148,12 @@ async def get_anime_pic(event: CommandEvent):
         api_cursor = await db.open("anime_pic_db", "(id INTEGER PRIMARY KEY, api TEXT)")
         async with api_cursor:
             res = await (
-                await api_cursor.execute(
-                    "SELECT pref FROM anime_pic_db where id = ?", (event.user,)
+                await api_cursor.select("api", (event.user,), "id = ?"
                 )
             ).fetchone()
             if res is None:
-                await api_cursor.execute(
-                    "INSERT INTO anime_pic_db VALUES (?, ?)", (event.user, "rainchan")
+                await api_cursor.insert(
+                    (event.user, "rainchan")
                 )
                 pref: str = "rainchan"
             else:
@@ -186,9 +185,7 @@ async def set_anime_api_pref(event: CommandEvent):
         async with api_cursor:
             _, pref = event.command.split(" ")
             if pref in _mapping:
-                await api_cursor.execute(
-                    "INSERT INTO anime_pic_db VALUES (?, ?) "
-                    "ON CONFLICT (id) DO UPDATE SET pref = excluded.pref",
+                await api_cursor.insert(
                     (
                         event.user,
                         pref,
