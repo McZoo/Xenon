@@ -7,7 +7,7 @@ from graia.saya.builtins.broadcast import ListenerSchema
 
 import lib
 from lib.command import CommandEvent
-from lib.control import Permission
+from lib.control import Permission, Interval
 from lib.plugin import PluginContainer
 
 __version__ = "1.0.0"
@@ -25,7 +25,8 @@ plugins: PluginContainer = PluginContainer.current()
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent],
                             inline_dispatchers=[Literature(".about")],
-                            headless_decorators=[Permission.require(Permission.USER)]))
+                            headless_decorators=[Permission.require(Permission.USER),
+                                                 Interval.require(30.0, 2)]))
 async def about(event: CommandEvent):
     reply = MessageChain.create(
         [
@@ -42,7 +43,8 @@ async def about(event: CommandEvent):
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent],
                             inline_dispatchers=[Literature(".help")],
-                            headless_decorators=[Permission.require(Permission.USER)]))
+                            headless_decorators=[Permission.require(Permission.USER),
+                                                 Interval.require(30.0, 2)]))
 async def xenon_help(event: CommandEvent):
     if len(event.command.split()) == 2:
         name = event.command.split()[1]

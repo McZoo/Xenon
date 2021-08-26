@@ -9,7 +9,9 @@ import time
 from typing import Optional
 from concurrent.futures import ThreadPoolExecutor
 
+from graia.application import MessageChain
 from graia.application.event.lifecycle import ApplicationLaunched
+from graia.application.message.elements.internal import Plain
 from graia.broadcast import Broadcast
 from loguru import logger
 from prompt_toolkit import PromptSession
@@ -57,7 +59,8 @@ class Console(threading.Thread):
                 pass
             else:
                 if self.bcc:
-                    self.bcc.postEvent(CommandEvent("local", in_str, control.ADMIN))
+                    self.bcc.postEvent(CommandEvent("local", in_str, control.Permission.ADMIN,
+                                                    MessageChain.create([Plain(in_str)])))
 
     def stop(self):
         """

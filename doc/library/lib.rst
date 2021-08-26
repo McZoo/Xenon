@@ -10,7 +10,7 @@ lib - Xenon 库的基础
     config
     database
     command
-    permission
+    control
     plugin
     utils
     path

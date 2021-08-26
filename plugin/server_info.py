@@ -18,7 +18,7 @@ __plugin_doc__ = """\
 .server_info HOST：查询 HOST 位置服务器的状态
 """
 
-from lib.control import Permission
+from lib.control import Permission, Interval
 
 saya = Saya.current()
 channel = Channel.current()
@@ -26,7 +26,8 @@ channel = Channel.current()
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent],
                             inline_dispatchers=[Literature(".server_info")],
-                            headless_decorators=[Permission.require(Permission.USER)]))
+                            headless_decorators=[Permission.require(Permission.USER),
+                                                 Interval.require(120.0)]))
 async def get_info(event: CommandEvent):
     _, server_address = event.command.split(" ", 1)
     import mcstatus

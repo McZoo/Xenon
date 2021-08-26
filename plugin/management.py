@@ -28,8 +28,8 @@ channel = Channel.current()
                             headless_decorators=[Permission.require(Permission.OPERATOR)]))
 async def stopper(app: GraiaMiraiApplication, event: CommandEvent):
     logger.info("Stopping Xenon...")
-    await event.send_result(MessageChain.create([Plain("已停止Xenon。")]))
     lib.state = "STOP"
+    await event.send_result(MessageChain.create([Plain("已停止Xenon。")]))
     await app.shutdown()
 
 

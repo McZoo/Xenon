@@ -13,7 +13,7 @@ from graia.saya import Saya, Channel
 from graia.saya.builtins.broadcast import ListenerSchema
 
 from lib.command import CommandEvent
-from lib.control import Permission
+from lib.control import Permission, Interval
 
 LIMIT = 100
 
@@ -34,7 +34,8 @@ pattern = re.compile(r"^.roll[ ]?(?P<dice_cnt>\d+)?"
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent],
                             inline_dispatchers=[Literature(".roll")],
-                            headless_decorators=[Permission.require(Permission.USER)]))
+                            headless_decorators=[Permission.require(Permission.USER),
+                                                 Interval.require(30.0)]))
 async def roll_dice(event: CommandEvent):
     match = re.match(pattern, event.command)
 

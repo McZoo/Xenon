@@ -18,7 +18,7 @@ __plugin_doc__ = """\
 .music INFO：搜索 INFO 并发送最优匹配歌曲
 """
 
-from lib.control import Permission
+from lib.control import Permission, Interval
 
 saya = Saya.current()
 channel = Channel.current()
@@ -26,7 +26,8 @@ channel = Channel.current()
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent],
                             inline_dispatchers=[Literature(".music")],
-                            headless_decorators=[Permission.require(Permission.USER)]))
+                            headless_decorators=[Permission.require(Permission.USER),
+                                                 Interval.require(120.0)]))
 async def music(event: CommandEvent):
     import aiohttp
     info = event.command.removeprefix(".music ")

@@ -16,7 +16,7 @@ __author__ = "BlueGlassBlock"
 __plugin_name__ = "get_anime_pic"
 __dependency__ = {"aiohttp": "aiohttp"}
 
-from lib.control import Permission
+from lib.control import Permission, Interval
 
 __plugin_doc = """\
 .get_anime_pic：从用户配置的API获取一张图片
@@ -143,7 +143,8 @@ channel = Channel.current()
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent],
                             inline_dispatchers=[Literature(".get_anime_pic")],
-                            headless_decorators=[Permission.require(Permission.USER)]))
+                            headless_decorators=[Permission.require(Permission.USER),
+                                                 Interval.require(240.0)]))
 async def get_anime_pic(event: CommandEvent):
     api_cursor = await db.open("anime_pic_db", "(id INTEGER PRIMARY KEY, api TEXT)")
     async with api_cursor:
