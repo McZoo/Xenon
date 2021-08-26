@@ -25,7 +25,9 @@ __plugin_doc__ = f"""\
 saya = Saya.current()
 channel = Channel.current()
 
-pattern = re.compile(r"^.roll[ ]?(?P<dice_cnt>\d+)?d?(?P<max_side>\d+)?k?(?P<max_cnt>\d+)?")
+pattern = re.compile(r"^.roll[ ]?(?P<dice_cnt>\d+)?"
+                     r"[ ]*d?[ ]*(?P<max_side>\d+)?"
+                     r"[ ]*k?[ ]*(?P<max_cnt>\d+)?")
 
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent]))
@@ -57,12 +59,12 @@ async def roll_dice(event: CommandEvent):
 
         if not max_cnt_str:
             max_cnt = 0
-        elif int(max_cnt_str) > dice_cnt:
-            return await event.send_result(MessageChain.create([
-                Plain(f"你输入的值有误，取最大数{max_cnt_str} 不可大于总骰子数 {dice_cnt_str}")
-            ]))
         else:
             max_cnt = int(max_cnt_str)
+            if max_cnt > dice_cnt:
+                return await event.send_result(MessageChain.create([
+                    Plain(f"你输入的值有误，取最大数{max_cnt} 不可大于总骰子数 {dice_cnt}")
+                ]))
 
         dice_list = []
         for _ in range(dice_cnt):
