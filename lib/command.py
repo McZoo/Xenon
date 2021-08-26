@@ -3,21 +3,20 @@ from typing import Literal, Optional
 
 from graia.application import Friend, Group, Member, GraiaMiraiApplication, BotMessage
 from graia.application.context import application
-from graia.application.event import EmptyDispatcher
-from graia.application.event.messages import FriendMessage, GroupMessage, TempMessage
+from graia.application.event import BaseDispatcher, ApplicationDispatcher
+from graia.application.event.dispatcher import MessageChainCatcher
+from graia.application.event.messages import FriendMessage, GroupMessage
 from graia.application.event.mirai import MiraiEvent
 from graia.application.message.chain import MessageChain
-from graia.broadcast import Broadcast
+from graia.broadcast import Broadcast, DispatcherInterface
 from loguru import logger
-
-from . import permission
 
 
 class CommandEvent(MiraiEvent):
     """
     当该事件发生时, 有用户发送了一条命令。
 
-    当命令是本地console输入时，msg_chain, user, group 皆为 None。
+    当命令是本地console输入时，messageChain, user, group 皆为 None。
 
     **注意: 当监听该事件或该类事件时, 请优先考虑使用原始事件类作为类型注解, 以此获得事件类实例, 便于获取更多的信息!**
 
@@ -36,26 +35,31 @@ class CommandEvent(MiraiEvent):
     source: str
     command: str
     perm_lv: int
-    msg_chain: Optional[MessageChain] = None
+    messageChain: Optional[MessageChain] = None
     user: Optional[int] = None
     group: Optional[Group] = None
 
-    Dispatcher = EmptyDispatcher
+    class Dispatcher(BaseDispatcher):
+        mixin = [MessageChainCatcher, ApplicationDispatcher]
+
+        @staticmethod
+        async def catch(interface: "DispatcherInterface"):
+            pass
 
     def __init__(
-        self,
-        source: Literal["remote", "local"],
-        command: str,
-        perm_lv: int,
-        msg_chain: Optional[MessageChain] = None,
-        user: Optional[int] = None,
-        group: Optional[Group] = None,
+            self,
+            source: Literal["remote", "local"],
+            command: str,
+            perm_lv: int,
+            msg_chain: Optional[MessageChain] = None,
+            user: Optional[int] = None,
+            group: Optional[Group] = None,
     ):
         super().__init__(
             source=source,
             command=command,
             perm_lv=perm_lv,
-            msg_chain=msg_chain,
+            messageChain=msg_chain,
             user=user,
             group=group,
         )
@@ -99,13 +103,15 @@ def initialize(bcc: Broadcast):
     :param bcc: Broadcast
     """
 
+    from .control import Permission
+
     @bcc.receiver(GroupMessage)
     async def broadcast_command(event: GroupMessage, user: Member, group: Group):
         bcc.postEvent(
             CommandEvent(
                 "remote",
                 event.messageChain.asDisplay(),
-                await permission.get_perm(user.id),
+                await Permission.get(user.id),
                 event.messageChain,
                 user.id,
                 group,
@@ -118,21 +124,8 @@ def initialize(bcc: Broadcast):
             CommandEvent(
                 "remote",
                 event.messageChain.asDisplay(),
-                await permission.get_perm(user.id),
+                await Permission.get(user.id),
                 event.messageChain,
                 user.id,
-            )
-        )
-
-    @bcc.receiver(TempMessage)
-    async def broadcast_command(event: TempMessage, user: Member, group: Group):
-        bcc.postEvent(
-            CommandEvent(
-                "remote",
-                event.messageChain.asDisplay(),
-                await permission.get_perm(user.id),
-                event.messageChain,
-                user.id,
-                group,
             )
         )

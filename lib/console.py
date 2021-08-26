@@ -16,7 +16,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
 
 import lib
-from lib import permission
+from lib import control
 from lib.command import CommandEvent
 
 
@@ -57,7 +57,7 @@ class Console(threading.Thread):
                 pass
             else:
                 if self.bcc:
-                    self.bcc.postEvent(CommandEvent("local", in_str, permission.ADMIN))
+                    self.bcc.postEvent(CommandEvent("local", in_str, control.ADMIN))
 
     def stop(self):
         """

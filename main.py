@@ -25,7 +25,7 @@ if __name__ == "__main__":
     con.set_bcc(bcc)
     scheduler = GraiaScheduler(loop, bcc)
     db = lib.database.Database()
-    loop.run_until_complete(lib.permission.open_perm_db())
+    loop.run_until_complete(lib.control.Permission.open_db())
     app = GraiaMiraiApplication(
         broadcast=bcc, connect_info=session, logger=cast(AbstractLogger, logger)
     )

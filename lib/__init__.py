@@ -10,7 +10,7 @@ from . import (
     console,
     database,
     path,
-    permission,
+    control,
     plugin,
     utils,
 )
