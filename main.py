@@ -1,5 +1,6 @@
 # coding=utf-8
 import asyncio
+from asyncio import CancelledError
 from typing import cast
 
 from graia.application import GraiaMiraiApplication, AbstractLogger
@@ -37,9 +38,6 @@ if __name__ == "__main__":
         plugins = lib.plugin.load_plugins(saya)
     try:
         app.launch_blocking()
-    except (asyncio.exceptions.CancelledError, InvaildSession):
+    except (CancelledError, InvaildSession):
         loop.run_until_complete(db.close())
-        loop.stop()
-        loop.close()
-        del loop, bcc, scheduler, app, plugins, db
     con.stop()

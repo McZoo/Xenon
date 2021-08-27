@@ -1,4 +1,6 @@
 # coding=utf-8
+import asyncio
+
 from graia.application import MessageChain, GraiaMiraiApplication
 from graia.application.message.elements.internal import Plain
 from graia.application.message.parser.literature import Literature
@@ -30,7 +32,8 @@ async def stopper(app: GraiaMiraiApplication, event: CommandEvent):
     logger.info("Stopping Xenon...")
     lib.state = "STOP"
     await event.send_result(MessageChain.create([Plain("已停止Xenon。")]))
-    await app.shutdown()
+    await asyncio.sleep(1)
+    saya.broadcast.loop.create_task(app.shutdown())
 
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent],

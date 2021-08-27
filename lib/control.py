@@ -107,6 +107,7 @@ class Interval:
                 override_level: int = Permission.MODERATOR):
         """
         指示用户每执行 `max_exec` 次后需要至少相隔 `suspend_time` 秒才能再次触发功能
+
         等级在 `override_level` 以上的可以无视限制
 
         :param suspend_time: 冷却时间

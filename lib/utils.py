@@ -3,6 +3,7 @@
 Xenon 的工具库，封装了一些有用的函数
 """
 import logging
+import sys
 from datetime import datetime
 from os.path import join
 from typing import Iterable, Optional
@@ -91,7 +92,7 @@ def get_session(con: console.Console) -> Session:
                 }
                 cfg = SessionConfig(**data)
             except Exception as e:
-                con.output(f"{repr(e)}")
+                logger.info(f"{repr(e)}")
             else:
                 flag = False
     return Session(**cfg.dict())

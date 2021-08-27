@@ -12,7 +12,7 @@ from graia.saya.builtins.broadcast import ListenerSchema
 
 import lib
 from lib.command import CommandEvent
-from lib.control import Permission
+from lib.control import Permission, Interval
 from .entry_parser import to_list, to_text
 
 __version__ = "2.0.0"
@@ -37,13 +37,14 @@ liter = {
     "del": Literature(".cave-d"),
     "view": Literature(".cave-v"),
     "search": Literature(".cave-s"),
-    "count": Literature(".cave-count"),
+    "count": Literature(".cave-c"),
 }
 
 
 @channel.use(ListenerSchema(listening_events=[CommandEvent],
                             inline_dispatchers=[liter["cave"]],
-                            headless_decorators=[Permission.require(Permission.USER)]))
+                            headless_decorators=[Permission.require(Permission.USER),
+                                                 Interval.require(120.0)]))
 async def cave(event: CommandEvent):
     db_cur = await db.open(
         "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"

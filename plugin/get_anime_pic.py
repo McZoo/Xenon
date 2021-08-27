@@ -2,6 +2,7 @@
 import json
 from typing import Any, Callable, Coroutine, Dict, Tuple
 
+import aiohttp
 from graia.application import MessageChain
 from graia.application.message.elements.internal import Image, Plain
 from graia.application.message.parser.literature import Literature
@@ -34,7 +35,6 @@ async def get_lolicon() -> Tuple[bytes, str]:
     """
     Doc : https://api.lolicon.app
     """
-    import aiohttp
 
     async with aiohttp.request(
             "GET", "https://api.lolicon.app/" "setu/v2?size=regular&r18=0"
@@ -54,7 +54,6 @@ async def get_rainchan() -> Tuple[bytes, str]:
     """
     Doc : https://api.lolicon.app/#/setu
     """
-    import aiohttp
 
     async with aiohttp.request("GET", "https://pximg.rainchan.win/img") as response:
         img_data = await response.read()
@@ -68,7 +67,6 @@ async def get_pic_re() -> Tuple[bytes, str]:
     """
     Doc: https://api.bi/docs/animeapi/
     """
-    import aiohttp
 
     async with aiohttp.request(
             "GET", "https://pic.re/image?nin=male&nin=r-18"
@@ -81,7 +79,6 @@ async def get_waifu_pics_waifu() -> Tuple[bytes, str]:
     """
     Doc: https://waifu.pics/docs
     """
-    import aiohttp
 
     async with aiohttp.request("GET", "https://api.waifu.pics/sfw/waifu") as response:
         json_str = await response.text()
@@ -95,7 +92,6 @@ async def get_waifu_pics_neko() -> Tuple[bytes, str]:
     """
     Doc: https://waifu.pics/docs
     """
-    import aiohttp
 
     async with aiohttp.request("GET", "https://api.waifu.pics/sfw/neko") as response:
         json_str = await response.text()
@@ -109,7 +105,6 @@ async def get_sola_acg() -> Tuple[bytes, str]:
     """
     Doc: https://www.yingciyuan.cn/
     """
-    import aiohttp
 
     async with aiohttp.request("GET", "https://www.yingciyuan.cn/pc.php") as response:
         img_data = await response.read()
@@ -120,7 +115,6 @@ async def get_dmoe_cc() -> Tuple[bytes, str]:
     """
     Doc: https://www.dmoe.cc
     """
-    import aiohttp
 
     async with aiohttp.request("GET", "https://www.dmoe.cc/random.php") as response:
         img_data = await response.read()

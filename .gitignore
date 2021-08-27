@@ -9,3 +9,7 @@ log/*
 external/nsfw_detector.py
 plugin/daily_poem/data/*
 /doc/_build/
+
+/plugin/PHLogoGen/temp/
+/plugin/KissKiss/temp/
+/plugin/PetPet/temp/

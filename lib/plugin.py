@@ -8,10 +8,9 @@ from importlib.util import find_spec
 from types import ModuleType
 from typing import Dict, Optional, List, NamedTuple
 
-from graia.broadcast import RequirementCrashed
+from graia.saya import Saya
 from loguru import logger
 from pydantic import BaseModel
-from graia.saya import Saya
 
 from lib import path
 
@@ -58,10 +57,16 @@ class PluginSpec(BaseModel):
             data["name"] = module.__plugin_name__
         else:
             data["name"] = module.__name__.split(".")[-1]  # Last part
+        docs: List[str] = []
+        if module.__doc__:
+            docs.append(module.__doc__)
         if hasattr(module, "__plugin_doc__"):
-            data["doc"] = module.__plugin_doc__
-        else:
-            data["doc"] = module.__doc__ if module.__doc__ is not None else ""
+            docs.append(module.__plugin_doc__)
+        if hasattr(module, "__description__"):
+            docs.append(module.__description__)
+        if hasattr(module, "__usage__"):
+            docs.append(module.__usage__)
+        data["doc"] = "\n".join(docs)
         if hasattr(module, "__version__"):
             data["version"] = module.__version__
         if hasattr(module, "__author__"):
