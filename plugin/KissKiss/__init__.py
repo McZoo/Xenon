@@ -10,7 +10,7 @@ from graia.application.message.elements.internal import At, Image, Plain
 from graia.saya import Saya, Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-from lib import path, utils
+from lib import path
 
 # 插件信息
 __dependency__ = {"PIL": "pillow", "moviepy": "moviepy", "numpy": "numpy"}
@@ -29,25 +29,25 @@ channel.author(__author__)
 
 @channel.use(ListenerSchema(listening_events=[GroupMessage]))
 async def petpet_generator(
-    app: GraiaMiraiApplication, message: MessageChain, group: Group, member: Member
+        app: GraiaMiraiApplication, message: MessageChain, group: Group, member: Member
 ):
     if (
-        message.has(At)
-        and message.asDisplay().startswith("亲")
-        and message.get(At)[0].target != app.connect_info.account
+            message.has(At)
+            and message.asDisplay().startswith("亲")
+            and message.get(At)[0].target != app.connect_info.account
     ):
         if not os.path.exists(path.join(path.plugin, "KissKiss/temp")):
             os.mkdir(path.join(path.plugin, "KissKiss/temp"))
         target = message.get(At)[0].target
         if member.id == target:
             await app.sendGroupMessage(
-                group, MessageChain.create([Plain("请不要自交~😋")]), quote=message[Source][0]
+                group, MessageChain.create([Plain("请不要自交~")]), quote=message[Source][0]
             )
         else:
             pic = path.join(
                 path.plugin, f"KissKiss/temp/tempKiss-{member.id}-{target}.gif"
             )
-            await utils.async_run(kiss, member.id, target)
+            await kiss(member.id, target)
             await app.sendGroupMessage(
                 group, MessageChain.create([Image.fromLocalFile(pic)])
             )
@@ -77,7 +77,7 @@ def kiss_make_frame(operator, target, i):
     return numpy.array(gif_frame)
 
 
-def kiss(operator_id, target_id) -> None:
+async def kiss(operator_id, target_id) -> None:
     from PIL import Image
     from PIL import ImageDraw
 

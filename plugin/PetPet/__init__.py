@@ -9,7 +9,7 @@ from graia.application.message.elements.internal import Image
 from graia.saya import Saya, Channel
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-from lib import path, utils
+from lib import path
 from lib.command import CommandEvent
 from lib.control import Permission, Interval
 
@@ -39,13 +39,13 @@ channel.author(__author__)
 )
 async def petpet_generator(event: CommandEvent, message: MessageChain):
     if (
-        message.has(At)
-        and event.command.startswith("摸")
-        or event.command.startswith("摸 ")
+            message.has(At)
+            and event.command.startswith("摸")
+            or event.command.startswith("摸 ")
     ):
         if not os.path.exists(path.join(path.plugin, "PetPet/temp")):
             os.mkdir(path.join(path.plugin, "PetPet/temp"))
-        await utils.async_run(petpet, message.get(At)[0].target)
+        await petpet(message.get(At)[0].target)
         try:
             await event.send_result(
                 MessageChain.create(
@@ -159,7 +159,7 @@ def make_frame(avatar, i, squish=0, flip=False):
     return numpy.array(gif_frame)
 
 
-def petpet(member_id, flip=False, squish=0, fps=20) -> None:
+async def petpet(member_id, flip=False, squish=0, fps=20) -> None:
     """生成PetPet
 
     将输入的头像生成为所需的 PetPet 并输出
