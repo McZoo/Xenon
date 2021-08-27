@@ -87,7 +87,7 @@ async def cave_add(event: CommandEvent):
         msg_id = row[0]
         if msg_id is None:
             msg_id = 1
-            chain = liter["add"].prefix_match(event.messageChain)
+        chain = liter["add"].prefix_match(event.messageChain)
         await db_cur.insert(
             (
                 msg_id,
