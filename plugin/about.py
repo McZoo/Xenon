@@ -23,10 +23,16 @@ channel = Channel.current()
 plugins: PluginContainer = PluginContainer.current()
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".about")],
-                            headless_decorators=[Permission.require(Permission.USER),
-                                                 Interval.require(30.0, 2)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".about")],
+        headless_decorators=[
+            Permission.require(Permission.USER),
+            Interval.require(30.0, 2),
+        ],
+    )
+)
 async def about(event: CommandEvent):
     reply = MessageChain.create(
         [
@@ -41,10 +47,16 @@ async def about(event: CommandEvent):
     await event.send_result(reply)
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".help")],
-                            headless_decorators=[Permission.require(Permission.USER),
-                                                 Interval.require(30.0, 2)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".help")],
+        headless_decorators=[
+            Permission.require(Permission.USER),
+            Interval.require(30.0, 2),
+        ],
+    )
+)
 async def xenon_help(event: CommandEvent):
     if len(event.command.split()) == 2:
         name = event.command.split()[1]

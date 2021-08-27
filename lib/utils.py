@@ -2,11 +2,12 @@
 """
 Xenon 的工具库，封装了一些有用的函数
 """
+import asyncio
 import logging
-import sys
 from datetime import datetime
+from functools import partial
 from os.path import join
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Callable
 
 from croniter import croniter
 from graia.application import Session
@@ -31,7 +32,9 @@ class LoguruInterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+        logger.opt(depth=depth, exception=record.exc_info).log(
+            level, record.getMessage()
+        )
 
 
 def config_logger():
@@ -113,3 +116,16 @@ def crontab_iter(pattern: str, base: Optional[datetime] = None) -> Iterable[date
     iterator = croniter(pattern, base)
     while True:
         yield iterator.get_next(datetime)
+
+
+async def async_run(func: Callable, *args, **kwargs):
+    """
+    异步运行函数
+
+    :param func: 函数
+    :param args: 调用参数
+    :param kwargs: 调用参数
+    :return:
+    """
+    wrapped = partial(func, args, kwargs)
+    return await asyncio.to_thread(wrapped)

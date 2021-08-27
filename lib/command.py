@@ -47,13 +47,13 @@ class CommandEvent(MiraiEvent):
             pass
 
     def __init__(
-            self,
-            source: Literal["remote", "local"],
-            command: str,
-            perm_lv: int,
-            msg_chain: Optional[MessageChain] = None,
-            user: Optional[int] = None,
-            group: Optional[Group] = None,
+        self,
+        source: Literal["remote", "local"],
+        command: str,
+        perm_lv: int,
+        msg_chain: Optional[MessageChain] = None,
+        user: Optional[int] = None,
+        group: Optional[Group] = None,
     ):
         super().__init__(
             source=source,

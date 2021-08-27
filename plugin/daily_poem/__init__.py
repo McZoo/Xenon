@@ -37,39 +37,56 @@ with open(path.join(path.plugin, "daily_poem", "poems.json"), "r") as data_fp:
     data = json.load(data_fp)
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".poem")],
-                            headless_decorators=[Permission.require(Permission.OPERATOR)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".poem")],
+        headless_decorators=[Permission.require(Permission.OPERATOR)],
+    )
+)
 async def configure(event: CommandEvent):
     """
     Configure the plugin
     :param event: CommandEvent
     """
-    db_cur = await db.open(
-        "daily_poem_cfg", "(id INTEGER PRIMARY KEY, state INTEGER)"
-    )
+    db_cur = await db.open("daily_poem_cfg", "(id INTEGER PRIMARY KEY, state INTEGER)")
     async with db_cur:
         if len(event.command.split(" ")) == 2:
             try:
                 group_id = int(event.command.split(" ")[1])
             except ValueError as e:
-                return await event.send_result(MessageChain.create([Plain(f"{repr(e)}")]))
+                return await event.send_result(
+                    MessageChain.create([Plain(f"{repr(e)}")])
+                )
         elif event.group:
             group_id = event.group.id
         else:
             return await event.send_result(MessageChain.create([Plain("无法找到群组")]))
         if event.command == ".poem_enable":
-            await db_cur.insert((group_id, 1,))
+            await db_cur.insert(
+                (
+                    group_id,
+                    1,
+                )
+            )
             reply = "\n成功启用每日诗词"
         elif event.command == ".poem_disable":
-            await db_cur.insert((group_id, 0,))
+            await db_cur.insert(
+                (
+                    group_id,
+                    0,
+                )
+            )
             reply = "\n成功关闭每日诗词"
         elif event.command == ".poem_query":
-            res = await (
-                await db_cur.select("state", (group_id,), "id = ?")
-            ).fetchone()
+            res = await (await db_cur.select("state", (group_id,), "id = ?")).fetchone()
             if res is None:
-                await db_cur.insert((group_id, 0,))
+                await db_cur.insert(
+                    (
+                        group_id,
+                        0,
+                    )
+                )
                 cfg: int = 0
             else:
                 cfg: int = res[0]

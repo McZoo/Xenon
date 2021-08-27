@@ -16,4 +16,3 @@ from . import (
 )
 
 state = "INIT"
-

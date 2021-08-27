@@ -20,6 +20,7 @@ class Permission:
     """
     用于管理权限的类，不应被实例化
     """
+
     cursor: Optional[database.Cursor] = None
 
     ADMIN = 50
@@ -50,7 +51,9 @@ class Permission:
         因为打开数据库是异步的，所以需要作为协程函数调用
         """
         db = database.Database.current()
-        cls.cursor = await db.open("permission", "(id INTEGER PRIMARY KEY," "level INTEGER)")
+        cls.cursor = await db.open(
+            "permission", "(id INTEGER PRIMARY KEY," "level INTEGER)"
+        )
 
     @classmethod
     async def get(cls, user: Union[Friend, Member, int]) -> int:
@@ -89,9 +92,11 @@ class Permission:
 
         :param level: 限制等级
         """
+
         async def perm_check(event: CommandEvent):
             if event.perm_lv < level:
                 raise ExecutionStop()
+
         return Depend(perm_check)
 
 
@@ -99,12 +104,17 @@ class Interval:
     """
     用于冷却管理的类，不应被实例化
     """
+
     last_exec: DefaultDict[int, Tuple[int, float]] = defaultdict(lambda: (1, 0.0))
     sent_alert: Set[int] = set()
 
     @classmethod
-    def require(cls, suspend_time: float, max_exec: int = 1,
-                override_level: int = Permission.MODERATOR):
+    def require(
+        cls,
+        suspend_time: float,
+        max_exec: int = 1,
+        override_level: int = Permission.MODERATOR,
+    ):
         """
         指示用户每执行 `max_exec` 次后需要至少相隔 `suspend_time` 秒才能再次触发功能
 
@@ -114,6 +124,7 @@ class Interval:
         :param max_exec: 在再次冷却前可使用次数
         :param override_level: 可超越限制的最小等级
         """
+
         async def cd_check(event: CommandEvent):
             if event.perm_lv >= override_level:
                 return
@@ -130,9 +141,15 @@ class Interval:
                     cls.sent_alert.remove(event.user)
                 return
             if event.user not in cls.sent_alert:
-                await event.send_result(MessageChain.create([Plain(
-                    f"冷却还有{last[1] + suspend_time - current:.2f}秒结束，之后可再执行{max_exec}次"
-                )]))
+                await event.send_result(
+                    MessageChain.create(
+                        [
+                            Plain(
+                                f"冷却还有{last[1] + suspend_time - current:.2f}秒结束，之后可再执行{max_exec}次"
+                            )
+                        ]
+                    )
+                )
                 cls.sent_alert.add(event.user)
             raise ExecutionStop()
 

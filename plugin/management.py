@@ -25,9 +25,13 @@ saya = Saya.current()
 channel = Channel.current()
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".stop")],
-                            headless_decorators=[Permission.require(Permission.OPERATOR)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".stop")],
+        headless_decorators=[Permission.require(Permission.OPERATOR)],
+    )
+)
 async def stopper(app: GraiaMiraiApplication, event: CommandEvent):
     logger.info("Stopping Xenon...")
     lib.state = "STOP"
@@ -36,9 +40,13 @@ async def stopper(app: GraiaMiraiApplication, event: CommandEvent):
     saya.broadcast.loop.create_task(app.shutdown())
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".set-perm")],
-                            headless_decorators=[Permission.require(Permission.OPERATOR)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".set-perm")],
+        headless_decorators=[Permission.require(Permission.OPERATOR)],
+    )
+)
 async def update_permission(event: CommandEvent):
     try:
         _, user, lv = event.command.split(" ")
@@ -57,9 +65,13 @@ async def update_permission(event: CommandEvent):
     await event.send_result(MessageChain.create([Plain(reply)]))
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".query-perm")],
-                            headless_decorators=[Permission.require(Permission.OPERATOR)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".query-perm")],
+        headless_decorators=[Permission.require(Permission.OPERATOR)],
+    )
+)
 async def query_permission(event: CommandEvent):
     try:
         _, user = event.command.split(" ")

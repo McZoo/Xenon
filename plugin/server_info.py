@@ -24,10 +24,16 @@ saya = Saya.current()
 channel = Channel.current()
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".server_info")],
-                            headless_decorators=[Permission.require(Permission.USER),
-                                                 Interval.require(120.0)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".server_info")],
+        headless_decorators=[
+            Permission.require(Permission.USER),
+            Interval.require(120.0),
+        ],
+    )
+)
 async def get_info(event: CommandEvent):
     _, server_address = event.command.split(" ", 1)
     import mcstatus
@@ -61,9 +67,7 @@ async def get_info(event: CommandEvent):
                     "在线玩家：\n"
                 ),
                 Plain(
-                    "\n".join(i.name for i in players)
-                    if players is not None
-                    else "无"
+                    "\n".join(i.name for i in players) if players is not None else "无"
                 ),
             ]
         )

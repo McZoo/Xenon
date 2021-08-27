@@ -37,7 +37,7 @@ async def get_lolicon() -> Tuple[bytes, str]:
     """
 
     async with aiohttp.request(
-            "GET", "https://api.lolicon.app/" "setu/v2?size=regular&r18=0"
+        "GET", "https://api.lolicon.app/" "setu/v2?size=regular&r18=0"
     ) as response:
         json_str = await response.text()
         data = json.loads(json_str)
@@ -69,7 +69,7 @@ async def get_pic_re() -> Tuple[bytes, str]:
     """
 
     async with aiohttp.request(
-            "GET", "https://pic.re/image?nin=male&nin=r-18"
+        "GET", "https://pic.re/image?nin=male&nin=r-18"
     ) as response:
         img_data = await response.read()
         return img_data, "None"
@@ -135,16 +135,20 @@ saya = Saya.current()
 channel = Channel.current()
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".get_anime_pic")],
-                            headless_decorators=[Permission.require(Permission.USER),
-                                                 Interval.require(240.0)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".get_anime_pic")],
+        headless_decorators=[
+            Permission.require(Permission.USER),
+            Interval.require(240.0),
+        ],
+    )
+)
 async def get_anime_pic(event: CommandEvent):
     api_cursor = await db.open("anime_pic_db", "(id INTEGER PRIMARY KEY, api TEXT)")
     async with api_cursor:
-        res = await (
-            await api_cursor.select("api", (event.user,), "id = ?")
-        ).fetchone()
+        res = await (await api_cursor.select("api", (event.user,), "id = ?")).fetchone()
         if res is None:
             await api_cursor.insert((event.user, "rainchan"))
             pref: str = "rainchan"
@@ -165,9 +169,13 @@ async def get_anime_pic(event: CommandEvent):
         await event.send_result(reply)
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".set_anime_api")],
-                            headless_decorators=[Permission.require(Permission.FRIEND)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".set_anime_api")],
+        headless_decorators=[Permission.require(Permission.FRIEND)],
+    )
+)
 async def set_anime_api_pref(event: CommandEvent):
     if len(event.command.split(" ")) == 2:
         api_cursor = await db.open("anime_pic_db", "(id INTEGER PRIMARY KEY, api TEXT)")

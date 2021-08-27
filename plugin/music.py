@@ -24,17 +24,24 @@ saya = Saya.current()
 channel = Channel.current()
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".music")],
-                            headless_decorators=[Permission.require(Permission.USER),
-                                                 Interval.require(120.0)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".music")],
+        headless_decorators=[
+            Permission.require(Permission.USER),
+            Interval.require(120.0),
+        ],
+    )
+)
 async def music(event: CommandEvent):
     import aiohttp
+
     info = event.command.removeprefix(".music ")
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                    f"http://cloud-music.pl-fe.cn/cloudsearch?keywords={info}"
+                f"http://cloud-music.pl-fe.cn/cloudsearch?keywords={info}"
             ) as resp:
                 search_result = json.loads(await resp.text())
             if search_result["result"]["songCount"]:

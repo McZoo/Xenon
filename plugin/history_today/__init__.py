@@ -36,9 +36,13 @@ with open(path.join(path.plugin, "history_today", "history.json"), "r") as data_
     data = json.load(data_fp)
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".history")],
-                            headless_decorators=[Permission.require(Permission.OPERATOR)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".history")],
+        headless_decorators=[Permission.require(Permission.OPERATOR)],
+    )
+)
 async def configure(event: CommandEvent):
     """
     Configure the plugin
@@ -52,23 +56,38 @@ async def configure(event: CommandEvent):
             try:
                 group_id = int(event.command.split(" ")[1])
             except ValueError as e:
-                return await event.send_result(MessageChain.create([Plain(f"{repr(e)}")]))
+                return await event.send_result(
+                    MessageChain.create([Plain(f"{repr(e)}")])
+                )
         elif event.group:
             group_id = event.group.id
         else:
             return await event.send_result(MessageChain.create([Plain("无法找到群组")]))
         if event.command == ".history_enable":
-            await db_cur.insert((group_id, 1,))
+            await db_cur.insert(
+                (
+                    group_id,
+                    1,
+                )
+            )
             reply = "\n成功启用历史上的今天"
         elif event.command == ".history_disable":
-            await db_cur.insert((group_id, 0,))
+            await db_cur.insert(
+                (
+                    group_id,
+                    0,
+                )
+            )
             reply = "\n成功关闭历史上的今天"
         elif event.command == ".history_query":
-            res = await (
-                await db_cur.select("state", (group_id,), "id = ?")
-            ).fetchone()
+            res = await (await db_cur.select("state", (group_id,), "id = ?")).fetchone()
             if res is None:
-                await db_cur.insert((group_id, 0,))
+                await db_cur.insert(
+                    (
+                        group_id,
+                        0,
+                    )
+                )
                 cfg: int = 0
             else:
                 cfg: int = res[0]
@@ -94,12 +113,12 @@ async def post_history_today():
         for group in groups:
             entries = data[str(curr_time.month)][str(curr_time.day)]["data"]
             msg = (
-                    f"今天是{curr_time.year}年{curr_time.month}月{curr_time.day}日\n"
-                    + (
-                        f"{data[str(curr_time.month)][str(curr_time.day)]['festival']}\n"
-                        if data[str(curr_time.month)][str(curr_time.day)]["festival"]
-                        else ""
-                    )
-                    + "\n".join(f"{e[0]}年，{e[1]}" for e in entries)
+                f"今天是{curr_time.year}年{curr_time.month}月{curr_time.day}日\n"
+                + (
+                    f"{data[str(curr_time.month)][str(curr_time.day)]['festival']}\n"
+                    if data[str(curr_time.month)][str(curr_time.day)]["festival"]
+                    else ""
+                )
+                + "\n".join(f"{e[0]}年，{e[1]}" for e in entries)
             )
             await app.sendGroupMessage(group, MessageChain.create([Plain(msg)]))

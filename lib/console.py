@@ -56,8 +56,14 @@ class Console(threading.Thread):
                 pass
             else:
                 try:
-                    self.bcc.postEvent(CommandEvent("local", in_str, control.Permission.ADMIN,
-                                                    MessageChain.create([Plain(in_str)])))
+                    self.bcc.postEvent(
+                        CommandEvent(
+                            "local",
+                            in_str,
+                            control.Permission.ADMIN,
+                            MessageChain.create([Plain(in_str)]),
+                        )
+                    )
                 except Exception as e:
                     logger.exception(e)
 
@@ -93,7 +99,9 @@ class Console(threading.Thread):
         while lib.state == "RUN":
             await asyncio.sleep(0.01)
             with patch_stdout(raw=True):
-                curr_input = await p_session.prompt_async("> ", set_exception_handler=False)
+                curr_input = await p_session.prompt_async(
+                    "> ", set_exception_handler=False
+                )
             if curr_input:
                 self.in_queue.put(curr_input)
                 logger.info(f"Command: {curr_input}")

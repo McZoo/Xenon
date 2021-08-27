@@ -26,13 +26,17 @@ saya = Saya.current()
 channel = Channel.current()
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[Literature(".soup")],
-                            headless_decorators=[Permission.require(Permission.USER),
-                                                 Interval.require(30.0, 2)]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".soup")],
+        headless_decorators=[
+            Permission.require(Permission.USER),
+            Interval.require(30.0, 2),
+        ],
+    )
+)
 async def soup(event: CommandEvent):
-    async with aiohttp.request(
-            "GET", "http://api.btstu.cn/yan/api.php"
-    ) as response:
+    async with aiohttp.request("GET", "http://api.btstu.cn/yan/api.php") as response:
         json_str = await response.text()
     await event.send_result(MessageChain.create([Plain(json_str)]))

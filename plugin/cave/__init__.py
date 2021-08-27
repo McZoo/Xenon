@@ -41,14 +41,18 @@ liter = {
 }
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[liter["cave"]],
-                            headless_decorators=[Permission.require(Permission.USER),
-                                                 Interval.require(120.0)]))
-async def cave(event: CommandEvent):
-    db_cur = await db.open(
-        "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[liter["cave"]],
+        headless_decorators=[
+            Permission.require(Permission.USER),
+            Interval.require(120.0),
+        ],
     )
+)
+async def cave(event: CommandEvent):
+    db_cur = await db.open("cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)")
     async with db_cur:
         entry = await (
             await db_cur.select("*", order_by="RANDOM() DESC", extra="LIMIT 1")
@@ -57,26 +61,30 @@ async def cave(event: CommandEvent):
         await event.send_result(await to_list(entry[2], [Plain(msg)]))
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[liter["count"]],
-                            headless_decorators=[Permission.require(Permission.FRIEND)]))
-async def cave_count(event: CommandEvent):
-    db_cur = await db.open(
-        "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[liter["count"]],
+        headless_decorators=[Permission.require(Permission.FRIEND)],
     )
+)
+async def cave_count(event: CommandEvent):
+    db_cur = await db.open("cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)")
     async with db_cur:
         cnt = await ((await db_cur.select("COUNT()")).fetchone())
         reply = MessageChain.create([Plain(f"Xenon 回声洞：\n共有{cnt[0]}条记录")])
     await event.send_result(reply)
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[liter["add"]],
-                            headless_decorators=[Permission.require(Permission.FRIEND)]))
-async def cave_add(event: CommandEvent):
-    db_cur = await db.open(
-        "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[liter["add"]],
+        headless_decorators=[Permission.require(Permission.FRIEND)],
     )
+)
+async def cave_add(event: CommandEvent):
+    db_cur = await db.open("cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)")
     async with db_cur:
         row = await (
             await db_cur.select(
@@ -99,19 +107,19 @@ async def cave_add(event: CommandEvent):
         await event.send_result(reply)
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[liter["del"]],
-                            headless_decorators=[Permission.require(Permission.FRIEND)]))
-async def cave_del(event: CommandEvent):
-    db_cur = await db.open(
-        "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[liter["del"]],
+        headless_decorators=[Permission.require(Permission.FRIEND)],
     )
+)
+async def cave_del(event: CommandEvent):
+    db_cur = await db.open("cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)")
     async with db_cur:
         try:
             target_id = int(event.command.removeprefix(".cave-d "))
-            res = await (
-                await db_cur.select("*", (target_id,), "id = ?")
-            ).fetchone()
+            res = await (await db_cur.select("*", (target_id,), "id = ?")).fetchone()
             if not res:
                 raise ValueError(f"#{target_id}不存在")
         except ValueError as e:
@@ -122,19 +130,19 @@ async def cave_del(event: CommandEvent):
         await event.send_result(reply)
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[liter["view"]],
-                            headless_decorators=[Permission.require(Permission.FRIEND)]))
-async def cave_view(event: CommandEvent):
-    db_cur = await db.open(
-        "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[liter["view"]],
+        headless_decorators=[Permission.require(Permission.FRIEND)],
     )
+)
+async def cave_view(event: CommandEvent):
+    db_cur = await db.open("cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)")
     async with db_cur:
         try:
             target_id = int(event.command.removeprefix(".cave-v "))
-            res = await (
-                await db_cur.select("*", (target_id,), "id = ?")
-            ).fetchone()
+            res = await (await db_cur.select("*", (target_id,), "id = ?")).fetchone()
             if not res:
                 raise ValueError(f"#{target_id}不存在")
         except ValueError as e:
@@ -144,13 +152,15 @@ async def cave_view(event: CommandEvent):
         await event.send_result(reply)
 
 
-@channel.use(ListenerSchema(listening_events=[CommandEvent],
-                            inline_dispatchers=[liter["search"]],
-                            headless_decorators=[Permission.require(Permission.FRIEND)]))
-async def cave_search(event: CommandEvent):
-    db_cur = await db.open(
-        "cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)"
+@channel.use(
+    ListenerSchema(
+        listening_events=[CommandEvent],
+        inline_dispatchers=[liter["search"]],
+        headless_decorators=[Permission.require(Permission.FRIEND)],
     )
+)
+async def cave_search(event: CommandEvent):
+    db_cur = await db.open("cave", "(id INTEGER PRIMARY KEY, name TEXT, message TEXT)")
     async with db_cur:
         target = event.command.removeprefix(".cave-s ")
         msg = await (
