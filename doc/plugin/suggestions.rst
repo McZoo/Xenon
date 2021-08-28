@@ -1,3 +1,5 @@
+.. _suggestions:
+
 插件开发建议
 ==============
 
@@ -47,3 +49,25 @@ Xenon 提供了 :class:`lib.database.Database` 对象作为数据库入口。
             await db_cur.insert((ID, CONTENT)) # 可以直接插入
             await db_cur.select("*", (CONTENT,), condition="bar = ?")
 
+
+Command
+------------
+命令处理是QQ Bot的核心功能之一。
+
+使用 `Graia Application` 提供的 Literature 和 Kanata 可以轻松地匹配消息链。
+
+同时， Xenon 通过 `headless_decorator` 提供的响应控制也可清晰地完成调用限制。
+
+参见 :class:`lib.control.Permission` 与 :class:`lib.control.Interval` 了解更多。
+
+
+.. code-block:: python
+
+    ...
+
+    @channel.use(ListenerSchema(listening_events=[CommandEvent],
+                            inline_dispatchers=[Literature(".cmd")],
+                            headless_decorators=[Permission.require(Permission.USER),
+                                                 Interval.require(30.0)]))
+    async def parse_cmd(event: CommandEvent):
+        ...

@@ -7,7 +7,7 @@ Xenon 的设置
 import json
 import os
 from functools import partial
-from typing import Optional, Literal, final
+from typing import Literal, Optional, final
 
 import pydantic
 import yaml

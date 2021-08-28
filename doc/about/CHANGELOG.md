@@ -1,5 +1,23 @@
 # 改动记录
 
+## 0.5.0
+为 `lib.control.Interval` 使用 `asyncio.Lock` 上锁
+
+## 0.4.5
+添加了三个插件，修复了一些逻辑问题
+
+## 0.4.4
+修复了一些 bug
+
+添加了基于 `headless_decorator` 的权限控制和调用间隔控制
+
+## 0.4.3
+修复了一些 bug
+
+添加了 `StarGazer4K` 提供的毒鸡汤插件
+
+添加依赖解析器
+
 ## 0.4.2
 修复了 cave 插件的 bug
 

@@ -2,10 +2,12 @@
 """
 Xenon 的工具库，封装了一些有用的函数
 """
+import asyncio
+import logging
 from datetime import datetime
+from functools import partial
 from os.path import join
-from types import FunctionType
-from typing import Iterable, Optional
+from typing import Callable, Iterable, Optional
 
 from croniter import croniter
 from graia.application import Session
@@ -14,6 +16,25 @@ from prompt_toolkit.patch_stdout import StdoutProxy
 from pydantic import AnyHttpUrl
 
 from . import config, console, path
+
+
+class LoguruInterceptHandler(logging.Handler):
+    def emit(self, record):
+        # Get corresponding Loguru level if it exists
+        try:
+            level = logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+
+        # Find caller from where originated the logged message
+        frame, depth = logging.currentframe(), 2
+        while frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+
+        logger.opt(depth=depth, exception=record.exc_info).log(
+            level, record.getMessage()
+        )
 
 
 def config_logger():
@@ -32,6 +53,7 @@ def config_logger():
         level="DEBUG",
         rotation="00:00",
     )
+    logging.basicConfig(handlers=[LoguruInterceptHandler()], level=0)
 
 
 class SessionConfig(config.XenonConfig):
@@ -73,7 +95,7 @@ def get_session(con: console.Console) -> Session:
                 }
                 cfg = SessionConfig(**data)
             except Exception as e:
-                con.output(f"{repr(e)}")
+                logger.info(f"{repr(e)}")
             else:
                 flag = False
     return Session(**cfg.dict())
@@ -94,3 +116,16 @@ def crontab_iter(pattern: str, base: Optional[datetime] = None) -> Iterable[date
     iterator = croniter(pattern, base)
     while True:
         yield iterator.get_next(datetime)
+
+
+async def async_run(func: Callable, *args, **kwargs):
+    """
+    异步运行函数
+
+    :param func: 函数
+    :param args: 调用参数
+    :param kwargs: 调用参数
+    :return:
+    """
+    wrapped = partial(func, args, kwargs)
+    return await asyncio.to_thread(wrapped)

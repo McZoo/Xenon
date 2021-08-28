@@ -88,6 +88,7 @@ class Cursor(aiosqlite.Cursor):
 
 aiosqlite.Cursor.select = Cursor.select
 aiosqlite.Cursor.insert = Cursor.insert
+aiosqlite.Cursor.delete = Cursor.delete
 
 
 class Database:

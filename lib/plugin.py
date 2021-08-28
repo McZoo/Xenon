@@ -6,12 +6,21 @@ import importlib
 import os
 from importlib.util import find_spec
 from types import ModuleType
-from typing import Dict, Optional, List, NamedTuple
+from typing import Dict, List, NamedTuple, Optional
 
-from pydantic import BaseModel
 from graia.saya import Saya
+from loguru import logger
+from pydantic import BaseModel
 
 from lib import path
+
+
+class DependencyBroken(Exception):
+    """
+    指示插件的依赖已损坏，用于在插件的 `__raise__` 属性上使用
+    """
+
+    pass
 
 
 class DependencyEntry(BaseModel):
@@ -48,10 +57,17 @@ class PluginSpec(BaseModel):
             data["name"] = module.__plugin_name__
         else:
             data["name"] = module.__name__.split(".")[-1]  # Last part
+        docs: List[str] = []
+        if module.__doc__:
+            docs.append(module.__doc__.strip("\n"))
         if hasattr(module, "__plugin_doc__"):
-            data["doc"] = module.__plugin_doc__
-        else:
-            data["doc"] = module.__doc__ if module.__doc__ is not None else ""
+            docs.append(module.__plugin_doc__.strip("\n"))
+        if hasattr(module, "__description__"):
+            docs.append(module.__description__.strip("\n"))
+        if hasattr(module, "__usage__"):
+            docs.append("用法：")
+            docs.append(module.__usage__.strip("\n"))
+        data["doc"] = "\n".join(docs)
         if hasattr(module, "__version__"):
             data["version"] = module.__version__
         if hasattr(module, "__author__"):
@@ -66,6 +82,9 @@ class PluginSpec(BaseModel):
                 entry_list.append(entry)
             data["dependency"] = [DependencyEntry(*t) for t in dependency_dict.items()]
             data["dependency_matched"] = all(data["dependency"])
+            if hasattr(module, "__raise__"):
+                if isinstance(module.__raise__, DependencyBroken):
+                    data["dependency_matched"] = False
         super().__init__(**data)
 
 
@@ -119,8 +138,10 @@ def load_plugins(saya: Saya) -> PluginContainer:
         try:
             saya.require(import_path)
             curr_plugin = importlib.import_module(import_path)
-        except ImportError:
+        except Exception as e:
             container.broken.append(name)
+            logger.error(f"An error occurred when loading {name}:")
+            logger.error(e)
         else:
             spec = PluginSpec(curr_plugin)
             info = PluginInfo(name, spec, curr_plugin)
