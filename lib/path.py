@@ -13,7 +13,7 @@ plugin: 插件所在路径
 database: 数据库文件所在路径
 """
 from os import makedirs
-from os.path import abspath, join, exists
+from os.path import abspath, exists, join
 
 root = abspath(join(__file__, "..", ".."))
 config = abspath(join(root, "config"))

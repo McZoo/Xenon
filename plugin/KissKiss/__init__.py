@@ -7,17 +7,18 @@ from graia.application.event.messages import *
 from graia.application.event.messages import Group, Member
 from graia.application.message.chain import MessageChain
 from graia.application.message.elements.internal import At, Image, Plain
-from graia.saya import Saya, Channel
+from graia.application.message.parser.literature import Literature
+from graia.saya import Channel, Saya
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-from lib import path
+from lib import path, utils
 
 # 插件信息
 __dependency__ = {"PIL": "pillow", "moviepy": "moviepy", "numpy": "numpy"}
 __name__ = "KissKiss"
 __description__ = "生成亲吻gif"
 __author__ = "Super_Water_God"
-__usage__ = "在群内发送 亲@目标 即可"
+__usage__ = ".kiss @TARGET"
 
 saya = Saya.current()
 channel = Channel.current()
@@ -27,15 +28,15 @@ channel.description(f"{__description__}\n使用方法：{__usage__}")
 channel.author(__author__)
 
 
-@channel.use(ListenerSchema(listening_events=[GroupMessage]))
+@channel.use(
+    ListenerSchema(
+        listening_events=[GroupMessage], inline_dispatchers=[Literature(".kiss")]
+    )
+)
 async def petpet_generator(
-        app: GraiaMiraiApplication, message: MessageChain, group: Group, member: Member
+    app: GraiaMiraiApplication, message: MessageChain, group: Group, member: Member
 ):
-    if (
-            message.has(At)
-            and message.asDisplay().startswith("亲")
-            and message.get(At)[0].target != app.connect_info.account
-    ):
+    if message.has(At) and message.get(At)[0].target != app.connect_info.account:
         if not os.path.exists(path.join(path.plugin, "KissKiss/temp")):
             os.mkdir(path.join(path.plugin, "KissKiss/temp"))
         target = message.get(At)[0].target
@@ -83,40 +84,46 @@ async def kiss(operator_id, target_id) -> None:
 
     operator_url = f"http://q1.qlogo.cn/g?b=qq&nk={str(operator_id)}&s=640"
     target_url = f"http://q1.qlogo.cn/g?b=qq&nk={str(target_id)}&s=640"
-    gif_frames = []
+
     async with aiohttp.ClientSession() as session:
         async with session.get(url=operator_url) as resp:
             operator_img = await resp.read()
-    operator = Image.open(BytesIO(operator_img))
     async with aiohttp.ClientSession() as session:
         async with session.get(url=target_url) as resp:
             target_img = await resp.read()
-    target = Image.open(BytesIO(target_img))
 
-    operator = operator.resize((40, 40), Image.ANTIALIAS)
-    size = operator.size
-    r2 = min(size[0], size[1])
-    circle = Image.new("L", (r2, r2))
-    draw = ImageDraw.Draw(circle)
-    draw.ellipse((0, 0, r2, r2), fill=255)
-    alpha = Image.new("L", (r2, r2), 255)
-    alpha.paste(circle, (0, 0))
-    operator.putalpha(alpha)
+    def __inner():
+        operator = Image.open(BytesIO(operator_img))
+        target = Image.open(BytesIO(target_img))
+        gif_frames = []
+        operator = operator.resize((40, 40), Image.ANTIALIAS)
+        size = operator.size
+        r2 = min(size[0], size[1])
+        circle = Image.new("L", (r2, r2))
+        draw = ImageDraw.Draw(circle)
+        draw.ellipse((0, 0, r2, r2), fill=255)
+        alpha = Image.new("L", (r2, r2), 255)
+        alpha.paste(circle, (0, 0))
+        operator.putalpha(alpha)
 
-    target = target.resize((50, 50), Image.ANTIALIAS)
-    size = target.size
-    r2 = min(size[0], size[1])
-    circle = Image.new("L", (r2, r2))
-    draw = ImageDraw.Draw(circle)
-    draw.ellipse((0, 0, r2, r2), fill=255)
-    alpha = Image.new("L", (r2, r2), 255)
-    alpha.paste(circle, (0, 0))
-    target.putalpha(alpha)
+        target = target.resize((50, 50), Image.ANTIALIAS)
+        size = target.size
+        r2 = min(size[0], size[1])
+        circle = Image.new("L", (r2, r2))
+        draw = ImageDraw.Draw(circle)
+        draw.ellipse((0, 0, r2, r2), fill=255)
+        alpha = Image.new("L", (r2, r2), 255)
+        alpha.paste(circle, (0, 0))
+        target.putalpha(alpha)
 
-    for i in range(1, 14):
-        gif_frames.append(kiss_make_frame(operator, target, i))
-    save_gif(
-        gif_frames,
-        path.join(path.plugin, f"KissKiss/temp/tempKiss-{operator_id}-{target_id}.gif"),
-        fps=25,
-    )
+        for i in range(1, 14):
+            gif_frames.append(kiss_make_frame(operator, target, i))
+        save_gif(
+            gif_frames,
+            path.join(
+                path.plugin, f"KissKiss/temp/tempKiss-{operator_id}-{target_id}.gif"
+            ),
+            fps=25,
+        )
+
+    await utils.async_run(__inner)

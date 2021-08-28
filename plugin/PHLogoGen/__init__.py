@@ -2,16 +2,15 @@ import os
 
 from graia.application.exceptions import AccountMuted
 from graia.application.message.chain import MessageChain
-from graia.application.message.elements.internal import Image
-from graia.application.message.elements.internal import Plain
+from graia.application.message.elements.internal import Image, Plain
 from graia.application.message.parser.kanata import Kanata
 from graia.application.message.parser.signature import RegexMatch
-from graia.saya import Saya, Channel
+from graia.saya import Channel, Saya
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
 from lib import path, utils
 from lib.command import CommandEvent
-from lib.control import Permission, Interval
+from lib.control import Interval, Permission
 
 # 插件信息
 __dependency__ = {"PIL": "pillow"}

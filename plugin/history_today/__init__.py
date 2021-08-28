@@ -16,6 +16,7 @@ from graia.scheduler.saya import SchedulerSchema
 import lib
 from lib import path
 from lib.command import CommandEvent
+from lib.control import Permission
 
 __version__ = "1.0.0"
 __plugin_name__ = "history_today"
@@ -27,7 +28,6 @@ __plugin_doc__ = """\
     ".history_query 查询本群历史上的今天启用状态",
 """
 
-from lib.control import Permission
 
 saya = Saya.current()
 channel = Channel.current()

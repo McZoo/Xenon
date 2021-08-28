@@ -1,14 +1,15 @@
 # coding=utf-8
 import base64
-from typing import Optional, List
+from typing import List, Optional
 
 from graia.application import MessageChain
 from graia.application.message.elements.internal import Image, Plain
 from graia.application.message.parser.literature import Literature
-from graia.saya import Saya, Channel
+from graia.saya import Channel, Saya
 from graia.saya.builtins.broadcast import ListenerSchema
 
 from lib.command import CommandEvent
+from lib.control import Interval, Permission
 
 __version__ = "1.0.0"
 __plugin_name__ = "server_info"
@@ -18,7 +19,6 @@ __plugin_doc__ = """\
 .server_info HOST：查询 HOST 位置服务器的状态
 """
 
-from lib.control import Permission, Interval
 
 saya = Saya.current()
 channel = Channel.current()

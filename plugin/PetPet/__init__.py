@@ -2,23 +2,22 @@ import os
 from io import BytesIO
 
 import aiohttp
-from graia.application.exceptions import AccountMuted
 from graia.application.message.chain import MessageChain
-from graia.application.message.elements.internal import At
-from graia.application.message.elements.internal import Image
-from graia.saya import Saya, Channel
+from graia.application.message.elements.internal import At, Image
+from graia.application.message.parser.literature import Literature
+from graia.saya import Channel, Saya
 from graia.saya.builtins.broadcast.schema import ListenerSchema
 
-from lib import path
+from lib import path, utils
 from lib.command import CommandEvent
-from lib.control import Permission, Interval
+from lib.control import Interval, Permission
 
 # 插件信息
 __dependency__ = {"PIL": "pillow", "moviepy": "moviepy", "numpy": "numpy"}
 __name__ = "PetPet"
 __description__ = "生成摸头gif"
 __author__ = "SAGIRI-kawaii"
-__usage__ = "在群内发送 摸@目标 即可"
+__usage__ = ".touch @TARGET"
 
 saya = Saya.current()
 channel = Channel.current()
@@ -31,6 +30,7 @@ channel.author(__author__)
 @channel.use(
     ListenerSchema(
         listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".touch")],
         headless_decorators=[
             Permission.require(Permission.FRIEND),
             Interval.require(120.0),
@@ -38,30 +38,23 @@ channel.author(__author__)
     )
 )
 async def petpet_generator(event: CommandEvent, message: MessageChain):
-    if (
-            message.has(At)
-            and event.command.startswith("摸")
-            or event.command.startswith("摸 ")
-    ):
+    if message.has(At):
         if not os.path.exists(path.join(path.plugin, "PetPet/temp")):
             os.mkdir(path.join(path.plugin, "PetPet/temp"))
         await petpet(message.get(At)[0].target)
-        try:
-            await event.send_result(
-                MessageChain.create(
-                    [
-                        Image.fromLocalFile(
-                            path.join(
-                                path.plugin,
-                                f"PetPet/temp",
-                                f"tempPetPet-{message.get(At)[0].target}.gif",
-                            )
+        await event.send_result(
+            MessageChain.create(
+                [
+                    Image.fromLocalFile(
+                        path.join(
+                            path.plugin,
+                            f"PetPet/temp",
+                            f"tempPetPet-{message.get(At)[0].target}.gif",
                         )
-                    ]
-                )
+                    )
+                ]
             )
-        except AccountMuted:
-            pass
+        )
 
 
 frame_spec = [
@@ -188,14 +181,17 @@ async def petpet(member_id, flip=False, squish=0, fps=20) -> None:
         async with session.get(url=url) as resp:
             img_content = await resp.read()
 
-    avatar = Image.open(BytesIO(img_content))
+    def __inner():
+        avatar = Image.open(BytesIO(img_content))
 
-    # 生成每一帧
-    for i in range(5):
-        gif_frames.append(make_frame(avatar, i, squish=squish, flip=flip))
-    # 输出
-    save_gif(
-        gif_frames,
-        path.join(path.plugin, f"PetPet/temp/tempPetPet-{member_id}.gif"),
-        fps=fps,
-    )
+        # 生成每一帧
+        for i in range(5):
+            gif_frames.append(make_frame(avatar, i, squish=squish, flip=flip))
+        # 输出
+        save_gif(
+            gif_frames,
+            path.join(path.plugin, f"PetPet/temp/tempPetPet-{member_id}.gif"),
+            fps=fps,
+        )
+
+    await utils.async_run(__inner)

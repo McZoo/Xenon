@@ -5,7 +5,7 @@ from typing import List
 
 from graia.application.message.chain import MessageChain
 from graia.application.message.elements import Element
-from graia.application.message.elements.internal import Plain, Image
+from graia.application.message.elements.internal import Image, Plain
 
 img_regex: re.Pattern = re.compile(r"<~_img_:([\w+/=]*):_img_~>")
 text_regex: re.Pattern = re.compile(r"Θ∧Ξ(.*)Ξ∧Θ")

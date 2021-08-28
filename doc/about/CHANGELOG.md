@@ -1,5 +1,8 @@
 # 改动记录
 
+## 0.5.0
+为 `lib.control.Interval` 使用 `asyncio.Lock` 上锁
+
 ## 0.4.5
 添加了三个插件，修复了一些逻辑问题
 

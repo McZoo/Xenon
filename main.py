@@ -3,7 +3,7 @@ import asyncio
 from asyncio import CancelledError
 from typing import cast
 
-from graia.application import GraiaMiraiApplication, AbstractLogger
+from graia.application import AbstractLogger, GraiaMiraiApplication
 from graia.application.exceptions import InvaildSession
 from graia.broadcast import Broadcast
 from graia.saya import Saya

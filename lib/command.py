@@ -1,9 +1,9 @@
 # coding=utf-8
 from typing import Literal, Optional
 
-from graia.application import Friend, Group, Member, GraiaMiraiApplication, BotMessage
+from graia.application import BotMessage, Friend, GraiaMiraiApplication, Group, Member
 from graia.application.context import application
-from graia.application.event import BaseDispatcher, ApplicationDispatcher
+from graia.application.event import ApplicationDispatcher, BaseDispatcher
 from graia.application.event.dispatcher import MessageChainCatcher
 from graia.application.event.messages import FriendMessage, GroupMessage
 from graia.application.event.mirai import MiraiEvent

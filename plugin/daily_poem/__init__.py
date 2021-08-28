@@ -10,13 +10,14 @@ from graia.application import MessageChain
 from graia.application.context import application
 from graia.application.message.elements.internal import Plain
 from graia.application.message.parser.literature import Literature
-from graia.saya import Saya, Channel
+from graia.saya import Channel, Saya
 from graia.saya.builtins.broadcast import ListenerSchema
 from graia.scheduler.saya import SchedulerSchema
 
 import lib
 from lib import path
 from lib.command import CommandEvent
+from lib.control import Permission
 
 __version__ = "1.0.0"
 __plugin_name__ = "daily_poem"
@@ -28,7 +29,6 @@ __plugin_doc__ = """\
 .poem_query 查询本群历史上的今天启用状态
 """
 
-from lib.control import Permission
 
 saya = Saya.current()
 channel = Channel.current()

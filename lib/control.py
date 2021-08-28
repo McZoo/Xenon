@@ -3,16 +3,16 @@
 Xenon 管理
 """
 import time
+from asyncio import Lock
 from collections import defaultdict
-from typing import Optional, Union, NoReturn, DefaultDict, Tuple, Set
+from typing import DefaultDict, NoReturn, Optional, Set, Tuple, Union
 
 from graia.application import Friend, Member, MessageChain
 from graia.application.message.elements.internal import Plain
+from graia.broadcast.builtin.decorators import Depend
+from graia.broadcast.exceptions import ExecutionStop
 
 from . import database
-from graia.broadcast.exceptions import ExecutionStop
-from graia.broadcast.builtin.decorators import Depend
-
 from .command import CommandEvent
 
 
@@ -107,6 +107,7 @@ class Interval:
 
     last_exec: DefaultDict[int, Tuple[int, float]] = defaultdict(lambda: (1, 0.0))
     sent_alert: Set[int] = set()
+    lock: Lock = Lock()
 
     @classmethod
     def require(
@@ -129,28 +130,30 @@ class Interval:
             if event.perm_lv >= override_level:
                 return
             current = time.time()
-            last = cls.last_exec[event.user]
-            if current - cls.last_exec[event.user][1] >= suspend_time:
-                cls.last_exec[event.user] = (1, current)
-                if event.user in cls.sent_alert:
-                    cls.sent_alert.remove(event.user)
-                return
-            elif last[0] < max_exec:
-                cls.last_exec[event.user] = (last[0] + 1, current)
-                if event.user in cls.sent_alert:
-                    cls.sent_alert.remove(event.user)
-                return
-            if event.user not in cls.sent_alert:
-                await event.send_result(
-                    MessageChain.create(
-                        [
-                            Plain(
-                                f"冷却还有{last[1] + suspend_time - current:.2f}秒结束，之后可再执行{max_exec}次"
-                            )
-                        ]
+            async with cls.lock:
+                last = cls.last_exec[event.user]
+                if current - cls.last_exec[event.user][1] >= suspend_time:
+                    cls.last_exec[event.user] = (1, current)
+                    if event.user in cls.sent_alert:
+                        cls.sent_alert.remove(event.user)
+                    return
+                elif last[0] < max_exec:
+                    cls.last_exec[event.user] = (last[0] + 1, current)
+                    if event.user in cls.sent_alert:
+                        cls.sent_alert.remove(event.user)
+                    return
+                if event.user not in cls.sent_alert:
+                    await event.send_result(
+                        MessageChain.create(
+                            [
+                                Plain(
+                                    f"冷却还有{last[1] + suspend_time - current:.2f}秒结束，"
+                                    f"之后可再执行{max_exec}次"
+                                )
+                            ]
+                        )
                     )
-                )
-                cls.sent_alert.add(event.user)
-            raise ExecutionStop()
+                    cls.sent_alert.add(event.user)
+                raise ExecutionStop()
 
         return Depend(cd_check)

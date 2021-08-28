@@ -6,7 +6,7 @@ import importlib
 import os
 from importlib.util import find_spec
 from types import ModuleType
-from typing import Dict, Optional, List, NamedTuple
+from typing import Dict, List, NamedTuple, Optional
 
 from graia.saya import Saya
 from loguru import logger
@@ -59,13 +59,14 @@ class PluginSpec(BaseModel):
             data["name"] = module.__name__.split(".")[-1]  # Last part
         docs: List[str] = []
         if module.__doc__:
-            docs.append(module.__doc__)
+            docs.append(module.__doc__.strip("\n"))
         if hasattr(module, "__plugin_doc__"):
-            docs.append(module.__plugin_doc__)
+            docs.append(module.__plugin_doc__.strip("\n"))
         if hasattr(module, "__description__"):
-            docs.append(module.__description__)
+            docs.append(module.__description__.strip("\n"))
         if hasattr(module, "__usage__"):
-            docs.append(module.__usage__)
+            docs.append("用法：")
+            docs.append(module.__usage__.strip("\n"))
         data["doc"] = "\n".join(docs)
         if hasattr(module, "__version__"):
             data["version"] = module.__version__

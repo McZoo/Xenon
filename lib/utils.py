@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 from functools import partial
 from os.path import join
-from typing import Iterable, Optional, Callable
+from typing import Callable, Iterable, Optional
 
 from croniter import croniter
 from graia.application import Session

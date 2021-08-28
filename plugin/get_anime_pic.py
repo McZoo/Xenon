@@ -6,18 +6,17 @@ import aiohttp
 from graia.application import MessageChain
 from graia.application.message.elements.internal import Image, Plain
 from graia.application.message.parser.literature import Literature
-from graia.saya import Saya, Channel
+from graia.saya import Channel, Saya
 from graia.saya.builtins.broadcast import ListenerSchema
 
 import lib
 from lib.command import CommandEvent
+from lib.control import Interval, Permission
 
 __version__ = "1.0.0"
 __author__ = "BlueGlassBlock"
 __plugin_name__ = "get_anime_pic"
-__dependency__ = {"aiohttp": "aiohttp"}
 
-from lib.control import Permission, Interval
 
 __plugin_doc = """\
 .get_anime_pic：从用户配置的API获取一张图片
