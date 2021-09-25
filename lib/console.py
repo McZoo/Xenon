@@ -9,7 +9,6 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
 from graia.application import MessageChain
-from graia.application.event.lifecycle import ApplicationLaunched
 from graia.application.message.elements.internal import Plain
 from graia.broadcast import Broadcast
 from loguru import logger
@@ -48,6 +47,7 @@ class Console(threading.Thread):
         """
         不断尝试获取新的输入，并作为 CommandEvent 广播
         """
+        logger.info("Successfully started Xenon console.")
         while lib.state == "RUN":
             await asyncio.sleep(0.01)
             try:
@@ -56,16 +56,14 @@ class Console(threading.Thread):
                 pass
             else:
                 try:
+                    logger.info(f"Posting: {in_str}")
                     self.bcc.postEvent(
-                        CommandEvent(
-                            "local",
-                            in_str,
-                            control.Permission.ADMIN,
-                            MessageChain.create([Plain(in_str)]),
-                        )
+                        CommandEvent("local", control.Permission.ADMIN,
+                                     MessageChain.create([Plain(in_str)]))
                     )
                 except Exception as e:
                     logger.exception(e)
+        logger.info("Successfully shut down Xenon console.")
 
     def stop(self):
         """
@@ -77,14 +75,6 @@ class Console(threading.Thread):
         self.join()
         self.__class__.__current = None
 
-    def input(self) -> str:
-        """
-        从内置的输入队列直接读取。
-
-        注意：程序不应自行使用本函数读取控制台输入，而应该通过处理 CommandEvent 获取输入。
-        """
-        return self.in_queue.get()
-
     def set_bcc(self, bcc: Broadcast):
         """
         注册发送命令事件的函数
@@ -92,7 +82,7 @@ class Console(threading.Thread):
         :param bcc: Broadcast 的实例
         """
         self.bcc = bcc
-        bcc.receiver(ApplicationLaunched)(self.command_poster)
+        self.bcc.loop.create_task(self.command_poster())
 
     async def _a_input(self):
         p_session = PromptSession()
@@ -104,7 +94,6 @@ class Console(threading.Thread):
                 )
             if curr_input:
                 self.in_queue.put(curr_input)
-                logger.info(f"Command: {curr_input}")
 
     def run(self):
         """

@@ -13,7 +13,7 @@ from lib.control import Interval, Permission
 __version__ = "1.0.0"
 __plugin_name__ = "music"
 __author__ = "BlueGlassBlock"
-__plugin_doc__ = """\
+__usage__ = """
 .music INFO：搜索 INFO 并发送最优匹配歌曲
 .music-id ID：基于网易云音乐ID发送歌曲
 """

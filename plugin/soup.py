@@ -18,7 +18,7 @@ LIMIT = 100
 __version__ = "1.0.0"
 __author__ = "StarGazer4K"
 __plugin_name__ = "soup"
-__plugin_doc__ = f"""\
+usage = """
 .soup 获取一碗毒鸡汤
 """
 
@@ -32,7 +32,7 @@ channel = Channel.current()
         inline_dispatchers=[Literature(".soup")],
         headless_decorators=[
             Permission.require(Permission.USER),
-            Interval.require(30.0, 2),
+            Interval.require(30.0),
         ],
     )
 )

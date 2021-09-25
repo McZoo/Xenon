@@ -15,22 +15,23 @@ from loguru import logger
 import lib
 
 if __name__ == "__main__":
+    lib.utils.cleanup_temp()
     lib.utils.config_logger()
     logger.info(f"Xenon {lib.__version__}")
     con = lib.console.Console()
     con.start()
     lib.state = "RUN"
     loop = asyncio.new_event_loop()
-    session = lib.utils.get_session(con)
     bcc = Broadcast(loop=loop)
     con.set_bcc(bcc)
+    lib.command.initialize(bcc)
     scheduler = GraiaScheduler(loop, bcc)
     db = lib.database.Database()
     loop.run_until_complete(lib.control.Permission.open_db())
+    session = lib.utils.get_session(bcc)
     app = GraiaMiraiApplication(
         broadcast=bcc, connect_info=session, logger=cast(AbstractLogger, logger)
     )
-    lib.command.initialize(bcc)
     saya = Saya(bcc)
     saya.install_behaviours(BroadcastBehaviour(bcc))
     saya.install_behaviours(GraiaSchedulerBehaviour(scheduler))
@@ -41,3 +42,4 @@ if __name__ == "__main__":
     except (CancelledError, InvaildSession):
         loop.run_until_complete(db.close())
     con.stop()
+    lib.utils.cleanup_temp()

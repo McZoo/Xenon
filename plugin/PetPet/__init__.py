@@ -22,10 +22,6 @@ __usage__ = ".touch @TARGET"
 saya = Saya.current()
 channel = Channel.current()
 
-channel.name(__name__)
-channel.description(f"{__description__}\n使用方法：{__usage__}")
-channel.author(__author__)
-
 
 @channel.use(
     ListenerSchema(

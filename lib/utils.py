@@ -2,20 +2,23 @@
 """
 Xenon 的工具库，封装了一些有用的函数
 """
-import asyncio
+import asyncio.log
 import logging
+import shutil
 from datetime import datetime
 from functools import partial
+from os import walk
 from os.path import join
 from typing import Callable, Iterable, Optional
 
 from croniter import croniter
 from graia.application import Session
+from graia.broadcast import Broadcast
 from loguru import logger
 from prompt_toolkit.patch_stdout import StdoutProxy
-from pydantic import AnyHttpUrl
+from pydantic import AnyHttpUrl, ValidationError
 
-from . import config, console, path
+from . import config, path, command
 
 
 class LoguruInterceptHandler(logging.Handler):
@@ -54,41 +57,34 @@ def config_logger():
         rotation="00:00",
     )
     logging.basicConfig(handlers=[LoguruInterceptHandler()], level=0)
+    asyncio.log.logger = logger
 
 
 class SessionConfig(config.XenonConfig):
     """
     用于生成 graia.application.Session 的设置类
     """
-
     host: AnyHttpUrl
     account: int
     authKey: str
+    name: str = "session"
 
 
-def get_session(con: console.Console) -> Session:
+def get_session(bcc: Broadcast) -> Session:
     """
     自动获取有效的 Session，并自动写入设置
-
-    :param con: Xenon 的 Console 实例
     :return: graia.application.Session 实例
     """
-    flag = False
     cfg = None
-    try:
-        cfg = SessionConfig.get_config("session")
-    except (FileNotFoundError, KeyError):
-        logger.error("Unable to load session file from local")
-        # read from console
-        logger.warning("Please specify session data by calling")
-        logger.warning("/session HOST_ADDRESS AUTHKEY ACCOUNT")
-        flag = True
-    while flag:
-        in_str = con.input()
-        in_args = in_str.split(" ")
-        if in_args[0] == "/session" and len(in_args) >= 4:
+
+    @bcc.receiver(command.CommandEvent)
+    async def session_getter(event: command.CommandEvent):
+        nonlocal cfg
+        in_args = event.command.split(" ")
+        if in_args[0] == ".set_session" and len(in_args) >= 4:
             try:
                 data = {
+                    "name": "session",
                     "host": in_args[1],
                     "authKey": " ".join(in_args[2:-1]),
                     "account": in_args[-1],
@@ -97,12 +93,23 @@ def get_session(con: console.Console) -> Session:
             except Exception as e:
                 logger.info(f"{repr(e)}")
             else:
-                flag = False
+                cfg.write()
+
+    try:
+        cfg = SessionConfig.get_config()
+    except ValidationError:
+        logger.error("Unable to load session file from local")
+        # read from console
+        logger.warning("Please specify session data by calling")
+        logger.warning(".set_session HOST_ADDRESS AUTHKEY ACCOUNT")
+        while cfg is None:
+            bcc.loop.run_until_complete(asyncio.sleep(1))
+
     return Session(**cfg.dict())
 
 
 def crontab_iter(pattern: str, base: Optional[datetime] = None) -> Iterable[datetime]:
-    """\
+    """
     使用类似 crontab 的方式生成计时器
 
     从graia.scheduler.timer改进而来
@@ -127,5 +134,11 @@ async def async_run(func: Callable, *args, **kwargs):
     :param kwargs: 调用参数
     :return:
     """
-    wrapped = partial(func, args, kwargs)
+    wrapped = partial(func, *args, **kwargs)
     return await asyncio.to_thread(wrapped)
+
+
+def cleanup_temp():
+    for curr, dirs, files in walk(path.plugin):
+        if curr.endswith("temp") or curr.endswith("tmp"):
+            shutil.rmtree(curr)

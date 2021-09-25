@@ -60,8 +60,6 @@ class PluginSpec(BaseModel):
         docs: List[str] = []
         if module.__doc__:
             docs.append(module.__doc__.strip("\n"))
-        if hasattr(module, "__plugin_doc__"):
-            docs.append(module.__plugin_doc__.strip("\n"))
         if hasattr(module, "__description__"):
             docs.append(module.__description__.strip("\n"))
         if hasattr(module, "__usage__"):

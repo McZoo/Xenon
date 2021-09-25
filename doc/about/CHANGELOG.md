@@ -1,5 +1,10 @@
 # 改动记录
 
+## 0.6.0
+增加 缩写 插件，在启动/关闭时自动删除临时图片文件以释放存储空间
+
+修复 `lib.control`
+
 ## 0.5.0
 为 `lib.control.Interval` 使用 `asyncio.Lock` 上锁
 

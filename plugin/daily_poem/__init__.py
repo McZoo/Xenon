@@ -22,8 +22,8 @@ from lib.control import Permission
 __version__ = "1.0.0"
 __plugin_name__ = "daily_poem"
 __author__ = "BlueGlassBlock"
-__plugin_doc__ = """\
-自动推送”每日诗词“至已注册的群
+__description__ = "自动推送”每日诗词“至已注册的群"
+__usage__ = """
 .poem_enable 在本群启用
 .poem_disable 在本群禁用
 .poem_query 查询本群历史上的今天启用状态

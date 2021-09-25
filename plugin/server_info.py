@@ -15,10 +15,9 @@ __version__ = "1.0.0"
 __plugin_name__ = "server_info"
 __author__ = "BlueGlassBlock"
 __dependency__ = {"mcstatus": "mcstatus"}
-__plugin_doc__ = """\
+__usage__ = """
 .server_info HOST：查询 HOST 位置服务器的状态
 """
-
 
 saya = Saya.current()
 channel = Channel.current()

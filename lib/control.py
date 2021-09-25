@@ -5,7 +5,8 @@ Xenon 管理
 import time
 from asyncio import Lock
 from collections import defaultdict
-from typing import DefaultDict, NoReturn, Optional, Set, Tuple, Union
+from numbers import Real
+from typing import DefaultDict, NoReturn, Optional, Union
 
 from graia.application import Friend, Member, MessageChain
 from graia.application.message.elements.internal import Plain
@@ -104,56 +105,43 @@ class Interval:
     """
     用于冷却管理的类，不应被实例化
     """
-
-    last_exec: DefaultDict[int, Tuple[int, float]] = defaultdict(lambda: (1, 0.0))
-    sent_alert: Set[int] = set()
+    next_exec: DefaultDict[int, float] = defaultdict(lambda: 0.0)
     lock: Lock = Lock()
 
     @classmethod
     def require(
-        cls,
-        suspend_time: float,
-        max_exec: int = 1,
-        override_level: int = Permission.MODERATOR,
+            cls,
+            suspend_time: Real,
+            override_level: int = Permission.MODERATOR,
     ):
         """
-        指示用户每执行 `max_exec` 次后需要至少相隔 `suspend_time` 秒才能再次触发功能
+        指示用户每执行一次后需要至少相隔 `suspend_time` 秒才能再次触发功能
 
         等级在 `override_level` 以上的可以无视限制
 
         :param suspend_time: 冷却时间
-        :param max_exec: 在再次冷却前可使用次数
         :param override_level: 可超越限制的最小等级
         """
 
         async def cd_check(event: CommandEvent):
+            cd: float = float(suspend_time)
             if event.perm_lv >= override_level:
                 return
             current = time.time()
             async with cls.lock:
-                last = cls.last_exec[event.user]
-                if current - cls.last_exec[event.user][1] >= suspend_time:
-                    cls.last_exec[event.user] = (1, current)
-                    if event.user in cls.sent_alert:
-                        cls.sent_alert.remove(event.user)
-                    return
-                elif last[0] < max_exec:
-                    cls.last_exec[event.user] = (last[0] + 1, current)
-                    if event.user in cls.sent_alert:
-                        cls.sent_alert.remove(event.user)
-                    return
-                if event.user not in cls.sent_alert:
+                next_exec = cls.next_exec[event.user]
+                if current < next_exec:
                     await event.send_result(
                         MessageChain.create(
                             [
                                 Plain(
-                                    f"冷却还有{last[1] + suspend_time - current:.2f}秒结束，"
-                                    f"之后可再执行{max_exec}次"
+                                    f"冷却还有{next_exec - current:.2f}秒结束"
                                 )
                             ]
                         )
                     )
-                    cls.sent_alert.add(event.user)
-                raise ExecutionStop()
+                    raise ExecutionStop()
+                else:
+                    cls.next_exec[event.user] = current + cd
 
         return Depend(cd_check)

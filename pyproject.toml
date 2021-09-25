@@ -16,6 +16,7 @@ graia-saya = "0.0.9"
 aiosqlite = "^0.17.0"
 croniter = "^0.3.37"
 loguru = "^0.5.3"
+graiax-v4-dependency = "^1.0.1"
 
 [tool.poetry.dev-dependencies]
 mcstatus = "^6.5.0"

@@ -21,11 +21,11 @@ from lib.control import Permission
 __version__ = "1.0.0"
 __plugin_name__ = "history_today"
 __author__ = "BlueGlassBlock"
-__plugin_doc__ = """\
-    "自动推送”历史上的今天“至已注册的群\n"
-    ".history_enable 在本群启用\n"
-    ".history_disable 在本群禁用\n"
-    ".history_query 查询本群历史上的今天启用状态",
+__description__ = "自动推送”历史上的今天“至已注册的群"
+__usage__ = """
+.history_enable 在本群启用
+.history_disable 在本群禁用
+.history_query 查询本群历史上的今天启用状态
 """
 
 

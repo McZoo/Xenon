@@ -16,9 +16,7 @@ from lib.control import Interval, Permission
 __version__ = "1.0.0"
 __author__ = "BlueGlassBlock"
 __plugin_name__ = "get_anime_pic"
-
-
-__plugin_doc = """\
+__usage__ = """
 .get_anime_pic：从用户配置的API获取一张图片
 .set_anime_api API_PROVIDER：设置用户的API为 API_PROVIDER
 API PROVIDER的可用值为：

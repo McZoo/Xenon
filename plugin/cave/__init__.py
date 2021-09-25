@@ -19,14 +19,15 @@ from .entry_parser import to_list, to_text
 __version__ = "2.0.0"
 __plugin_name__ = "cave"
 __author__ = "BlueGlassBlock"
-__plugin_doc__ = """\
-回声洞（不要与PCL2的回声洞混淆了！）
+__description__ = "回声洞（不要与PCL2的回声洞混淆了！）"
+__usage__ = """
 .cave： 从回声洞抽取一条语录
 .cave-a MESSAGE： 向回声洞添加一条语录
 .cave-v ID：查看回声洞指定ID的语录
 .cave-d ID：删除回声洞指定ID的语录
 .cave-s CONTENT: 在回声洞中搜索 CONTENT
-.cave-c：统计回声洞条数"""
+.cave-c：统计回声洞条数
+"""
 
 saya = Saya.current()
 channel = Channel.current()

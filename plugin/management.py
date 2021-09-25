@@ -1,4 +1,5 @@
 # coding=utf-8
+
 import asyncio
 
 from graia.application import GraiaMiraiApplication, MessageChain
@@ -15,7 +16,7 @@ from lib.control import Permission
 __version__ = "1.0.0"
 __plugin_name__ = "management"
 __author__ = "BlueGlassBlock"
-__plugin_doc__ = """\
+__usage__ = """
 .stop：完全停止 Xenon
 .set-perm USER_ID PERMISSION：设置USER_ID的权限为PERMISSION
 .query-perm USER_ID：查询USER_ID的权限

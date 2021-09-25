@@ -32,8 +32,6 @@
   若版本问题很重要，请在插件内自行判断，并在依赖不符合时将 `__raise__` 设置为
   :class:`lib.plugin.DependencyBroken`
 
-- `__plugin_doc__`: 此变量为字符串，作为插件的帮助文档使用，没有时则会使用 `__doc__`
-
 - `__raise__`: 导入过程中本来要引发的错误，
   现在只允许设置为 :class:`lib.plugin.DependencyBroken`
 

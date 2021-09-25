@@ -20,8 +20,9 @@ LIMIT = 100
 __version__ = "1.0.0"
 __author__ = "BlueGlassBlock"
 __plugin_name__ = "dice"
-__plugin_doc__ = f"""\
-.roll 掷骰子
+__usage__ = """
+.roll NUM_A d NUM_B k NUM_C
+掷 NUM_A 个骰子，每个骰子最大为 NUM_B，取最大的 NUM_C 个
 """
 
 saya = Saya.current()

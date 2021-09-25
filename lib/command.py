@@ -24,7 +24,6 @@ class CommandEvent(MiraiEvent):
         GraiaMiraiApplication (annotation): 发布事件的应用实例
 
     :param source: 命令的来源，为 "remote" 与 "local" 之一
-    :param command: 命令的字符串形式
     :param perm_lv: 命令发送者的权限等级，为一个整数
     :param msg_chain: 命令的原 MessageChain（可选）
     :param user: 发送命令的用户QQ号（可选）
@@ -32,7 +31,7 @@ class CommandEvent(MiraiEvent):
     """
 
     type = "CommandEvent"
-    source: str
+    source: Literal["friend", "local", "member"]
     command: str
     perm_lv: int
     messageChain: Optional[MessageChain] = None
@@ -48,8 +47,7 @@ class CommandEvent(MiraiEvent):
 
     def __init__(
         self,
-        source: Literal["remote", "local"],
-        command: str,
+        source: Literal["friend", "local", "member"],
         perm_lv: int,
         msg_chain: Optional[MessageChain] = None,
         user: Optional[int] = None,
@@ -57,7 +55,7 @@ class CommandEvent(MiraiEvent):
     ):
         super().__init__(
             source=source,
-            command=command,
+            command=msg_chain.asDisplay(),
             perm_lv=perm_lv,
             messageChain=msg_chain,
             user=user,
@@ -90,7 +88,7 @@ class CommandEvent(MiraiEvent):
         app: GraiaMiraiApplication = application.get()
         if self.source == "local":
             return "Console"
-        elif self.group:
+        elif self.source == "member":
             return (await app.getMember(self.group, self.user)).name
         else:
             return (await app.getFriend(self.user)).nickname
@@ -99,6 +97,7 @@ class CommandEvent(MiraiEvent):
 def initialize(bcc: Broadcast):
     """
     初始化 CommandEvent 的发送器
+    同时协助注册 Session 写入器
 
     :param bcc: Broadcast
     """
@@ -108,24 +107,12 @@ def initialize(bcc: Broadcast):
     @bcc.receiver(GroupMessage)
     async def broadcast_command(event: GroupMessage, user: Member, group: Group):
         bcc.postEvent(
-            CommandEvent(
-                "remote",
-                event.messageChain.asDisplay(),
-                await Permission.get(user.id),
-                event.messageChain,
-                user.id,
-                group,
-            )
+            CommandEvent("member", await Permission.get(user.id), event.messageChain, user.id,
+                         group)
         )
 
     @bcc.receiver(FriendMessage)
     async def broadcast_command(event: FriendMessage, user: Friend):
         bcc.postEvent(
-            CommandEvent(
-                "remote",
-                event.messageChain.asDisplay(),
-                await Permission.get(user.id),
-                event.messageChain,
-                user.id,
-            )
+            CommandEvent("friend", await Permission.get(user.id), event.messageChain, user.id)
         )

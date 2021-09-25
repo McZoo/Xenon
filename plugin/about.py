@@ -13,7 +13,7 @@ from lib.plugin import PluginContainer
 __version__ = "1.0.0"
 __plugin_name__ = "about"
 __author__ = "BlueGlassBlock"
-__plugin_doc__ = """\
+__usage__ = """
 .help： Xenon 的帮助菜单
 .about： 关于Xenon的信息
 """
@@ -29,7 +29,7 @@ plugins: PluginContainer = PluginContainer.current()
         inline_dispatchers=[Literature(".about")],
         headless_decorators=[
             Permission.require(Permission.USER),
-            Interval.require(30.0, 2),
+            Interval.require(30.0),
         ],
     )
 )
@@ -53,7 +53,7 @@ async def about(event: CommandEvent):
         inline_dispatchers=[Literature(".help")],
         headless_decorators=[
             Permission.require(Permission.USER),
-            Interval.require(30.0, 2),
+            Interval.require(30.0),
         ],
     )
 )
