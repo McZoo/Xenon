@@ -27,7 +27,8 @@ channel = Channel.current()
 
 @channel.use(
     ListenerSchema(
-        listening_events=[CommandEvent], inline_dispatchers=[Literature(".kiss")],
+        listening_events=[CommandEvent],
+        inline_dispatchers=[Literature(".kiss")],
         headless_decorators=[
             Permission.require(Permission.USER),
             Interval.require(120.0),
@@ -36,31 +37,26 @@ channel = Channel.current()
 )
 async def petpet_generator(event: CommandEvent, message: MessageChain):
     if event.source != "member":
-        await event.send_result(
-            MessageChain.create([Plain("请在群里使用")])
-        )
+        await event.send_result(MessageChain.create([Plain("请在群里使用")]))
         return
     if message.has(At) and message.get(At)[0].target != event.user:
         if not os.path.exists(path.join(path.plugin, "KissKiss/temp")):
             os.mkdir(path.join(path.plugin, "KissKiss/temp"))
         target = message.get(At)[0].target
         if event.user == target:
-            await event.send_result(
-                MessageChain.create([Plain("请不要自交~")])
-            )
+            await event.send_result(MessageChain.create([Plain("请不要自交~")]))
         else:
             pic = path.join(
                 path.plugin, f"KissKiss/temp/tempKiss-{event.user}-{target}.gif"
             )
             await kiss(event.user, target)
-            await event.send_result(
-                MessageChain.create([Image.fromLocalFile(pic)])
-            )
+            await event.send_result(MessageChain.create([Image.fromLocalFile(pic)]))
 
 
 def kiss_make_frame(operator, target, i):
     from PIL import Image
     import numpy
+
     operator_x = [92, 135, 84, 80, 155, 60, 50, 98, 35, 38, 70, 84, 75]
     operator_y = [64, 40, 105, 110, 82, 96, 80, 55, 65, 100, 80, 65, 65]
     target_x = [58, 62, 42, 50, 56, 18, 28, 54, 46, 60, 35, 20, 40]
@@ -91,7 +87,7 @@ async def kiss(operator_id, target_id) -> None:
         operator = Image.open(BytesIO(operator_img))
         target = Image.open(BytesIO(target_img))
         gif_frames = []
-        gif_frames: List[Image]
+        gif_frames: List[Image.Image]
         operator = operator.resize((40, 40), Image.ANTIALIAS)
         size = operator.size
         r2 = min(size[0], size[1])
@@ -114,9 +110,11 @@ async def kiss(operator_id, target_id) -> None:
         for i in range(1, 14):
             gif_frames.append(kiss_make_frame(operator, target, i))
         clip = ImageSequenceClip(gif_frames, fps=25)
-        clip.write_gif(path.join(
-            path.plugin, f"KissKiss/temp/tempKiss-{operator_id}-{target_id}.gif"
-        ))
+        clip.write_gif(
+            path.join(
+                path.plugin, f"KissKiss/temp/tempKiss-{operator_id}-{target_id}.gif"
+            )
+        )
         clip.close()
 
     await utils.async_run(__inner)

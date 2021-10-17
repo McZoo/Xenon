@@ -73,7 +73,7 @@ class CommandEvent(MiraiEvent):
         if self.source == "local":
             logger.info(message.asDisplay())
             receipt = None
-        elif self.group:
+        elif self.source == "member":
             receipt = await app.sendGroupMessage(self.group, message)
         else:
             receipt = await app.sendFriendMessage(self.user, message)

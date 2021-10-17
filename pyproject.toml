@@ -6,7 +6,7 @@ authors = ["McZoo Dev Team"]
 license = "AGPL-v3"
 
 [tool.poetry.dependencies]
-python = "3.9"
+python = "^3.8"
 prompt-toolkit = "^3.0.19"
 types-PyYAML = "^5.4.6"
 graia-application-mirai = "0.19.2"
