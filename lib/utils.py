@@ -18,7 +18,7 @@ from loguru import logger
 from prompt_toolkit.patch_stdout import StdoutProxy
 from pydantic import AnyHttpUrl, ValidationError
 
-from . import config, path, command
+from . import command, config, path
 
 
 class LoguruInterceptHandler(logging.Handler):
@@ -64,6 +64,7 @@ class SessionConfig(config.XenonConfig):
     """
     用于生成 graia.application.Session 的设置类
     """
+
     host: AnyHttpUrl
     account: int
     authKey: str

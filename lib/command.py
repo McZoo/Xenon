@@ -107,12 +107,19 @@ def initialize(bcc: Broadcast):
     @bcc.receiver(GroupMessage)
     async def broadcast_command(event: GroupMessage, user: Member, group: Group):
         bcc.postEvent(
-            CommandEvent("member", await Permission.get(user.id), event.messageChain, user.id,
-                         group)
+            CommandEvent(
+                "member",
+                await Permission.get(user.id),
+                event.messageChain,
+                user.id,
+                group,
+            )
         )
 
     @bcc.receiver(FriendMessage)
     async def broadcast_command(event: FriendMessage, user: Friend):
         bcc.postEvent(
-            CommandEvent("friend", await Permission.get(user.id), event.messageChain, user.id)
+            CommandEvent(
+                "friend", await Permission.get(user.id), event.messageChain, user.id
+            )
         )

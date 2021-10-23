@@ -121,8 +121,7 @@ def make_frame(avatar, i, squish=0, flip=False):
     为处理完的帧的数据
     """
     import numpy
-    from PIL import Image
-    from PIL import ImageOps
+    from PIL import Image, ImageOps
 
     # 读入位置
     spec = list(frame_spec[i])

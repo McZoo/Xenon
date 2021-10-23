@@ -4,7 +4,7 @@
 """
 import shlex
 from collections import defaultdict
-from typing import Dict, List, Optional, DefaultDict, Set
+from typing import DefaultDict, Dict, List, Optional, Set
 
 from graia.application import MessageChain
 from graia.application.message.elements.internal import Plain
@@ -62,8 +62,9 @@ async def set_abbr(event: CommandEvent):
             raise ValueError(f"映射不可与来源相同！")
         config.mapping[map_pattern] = ptr_pattern
         config.write()
-        await event.send_result(MessageChain.create([Plain(f'成功设置 {ptr_pattern}'
-                                                           f' 的缩写为 {map_pattern}')]))
+        await event.send_result(
+            MessageChain.create([Plain(f"成功设置 {ptr_pattern}" f" 的缩写为 {map_pattern}")])
+        )
     except Exception as e:
         logger.exception(e)
         await event.send_result(MessageChain.create([Plain(repr(e))]))
@@ -84,7 +85,7 @@ async def del_abbr(event: CommandEvent):
         pattern: str = args[1].strip(" ")
         del config.mapping[pattern]
         config.write()
-        await event.send_result(MessageChain.create([Plain(f'成功删除 {pattern} 的缩写')]))
+        await event.send_result(MessageChain.create([Plain(f"成功删除 {pattern} 的缩写")]))
     except Exception as e:
         logger.exception(e)
         await event.send_result(MessageChain.create([Plain(repr(e))]))
@@ -103,8 +104,7 @@ async def query_all_abbr(event: CommandEvent):
     entries: DefaultDict[str, Set[str]] = defaultdict(set)
     for key, val in config.mapping.items():
         entries[val].add(key)
-    reply = [f"被禁用的缩写：{config.restricted}",
-             f"缩写："]
+    reply = [f"被禁用的缩写：{config.restricted}", f"缩写："]
     for string, mapping in entries.items():
         reply.append(f"{mapping} -> {repr(string)}")
     await event.send_result(MessageChain.create([Plain("\n".join(reply))]))
@@ -122,10 +122,18 @@ async def repost(event: CommandEvent):
     for x in config.get_literature():
         res: Optional[MessageChain] = x.prefix_match(event.messageChain.asSendable())
         if res:
-            new_chain = MessageChain.create([Plain(config.mapping[x.prefixs[0]] + (
-                " " if len(res.__root__) else ""
-            ))])
+            new_chain = MessageChain.create(
+                [
+                    Plain(
+                        config.mapping[x.prefixs[0]]
+                        + (" " if len(res.__root__) else "")
+                    )
+                ]
+            )
             new_chain.plus(res)
             final_chain = new_chain.asMerged()
             saya.broadcast.postEvent(
-                CommandEvent(event.source, event.perm_lv, final_chain, event.user, event.group))
+                CommandEvent(
+                    event.source, event.perm_lv, final_chain, event.user, event.group
+                )
+            )

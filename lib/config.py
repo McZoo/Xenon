@@ -5,9 +5,9 @@ Xenon 的设置
 基于 pydantic，为插件提供了统一的设置接口。
 """
 import json
-from json.decoder import JSONDecodeError
 import os
-from typing import Optional, List
+from json.decoder import JSONDecodeError
+from typing import List, Optional
 
 import pydantic
 from loguru import logger

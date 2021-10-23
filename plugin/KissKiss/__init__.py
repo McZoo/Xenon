@@ -19,7 +19,7 @@ __author__ = "Super_Water_God"
 __usage__ = ".kiss @TARGET"
 
 from lib.command import CommandEvent
-from lib.control import Permission, Interval
+from lib.control import Interval, Permission
 
 saya = Saya.current()
 channel = Channel.current()
@@ -54,8 +54,8 @@ async def petpet_generator(event: CommandEvent, message: MessageChain):
 
 
 def kiss_make_frame(operator, target, i):
-    from PIL import Image
     import numpy
+    from PIL import Image
 
     operator_x = [92, 135, 84, 80, 155, 60, 50, 98, 35, 38, 70, 84, 75]
     operator_y = [64, 40, 105, 110, 82, 96, 80, 55, 65, 100, 80, 65, 65]
@@ -70,8 +70,8 @@ def kiss_make_frame(operator, target, i):
 
 
 async def kiss(operator_id, target_id) -> None:
-    from PIL import Image, ImageDraw
     from moviepy.editor import ImageSequenceClip
+    from PIL import Image, ImageDraw
 
     operator_url = f"http://q1.qlogo.cn/g?b=qq&nk={str(operator_id)}&s=640"
     target_url = f"http://q1.qlogo.cn/g?b=qq&nk={str(target_id)}&s=640"

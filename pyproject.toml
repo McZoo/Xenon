@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "xenon-bot"
-version = "0.4.0"
+version = "0.7.0"
 description = "An elegant QQ Bot using Mirai and Graia Project."
 authors = ["McZoo Dev Team"]
 license = "AGPL-v3"
@@ -17,6 +17,7 @@ aiosqlite = "^0.17.0"
 croniter = "^0.3.37"
 loguru = "^0.5.3"
 graiax-v4-dependency = "^1.0.1"
+psutil = "^5.8.0"
 
 [tool.poetry.dev-dependencies]
 mcstatus = "^6.5.0"
@@ -25,6 +26,11 @@ sphinx-rtd-theme = "^1.0.0rc1"
 recommonmark = "^0.7.1"
 autodoc = "^0.5.0"
 autodoc-pydantic = "^1.3.1"
+black = "^21.9b0"
+isort = "^5.9.3"
+
+[tool.isort]
+profile = "black"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

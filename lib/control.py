@@ -105,14 +105,15 @@ class Interval:
     """
     用于冷却管理的类，不应被实例化
     """
+
     next_exec: DefaultDict[int, float] = defaultdict(lambda: 0.0)
     lock: Lock = Lock()
 
     @classmethod
     def require(
-            cls,
-            suspend_time: Real,
-            override_level: int = Permission.MODERATOR,
+        cls,
+        suspend_time: Real,
+        override_level: int = Permission.MODERATOR,
     ):
         """
         指示用户每执行一次后需要至少相隔 `suspend_time` 秒才能再次触发功能
@@ -133,11 +134,7 @@ class Interval:
                 if current < next_exec:
                     await event.send_result(
                         MessageChain.create(
-                            [
-                                Plain(
-                                    f"冷却还有{next_exec - current:.2f}秒结束"
-                                )
-                            ]
+                            [Plain(f"冷却还有{next_exec - current:.2f}秒结束")]
                         )
                     )
                     raise ExecutionStop()

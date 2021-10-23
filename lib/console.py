@@ -58,8 +58,11 @@ class Console(threading.Thread):
                 try:
                     logger.info(f"Posting: {in_str}")
                     self.bcc.postEvent(
-                        CommandEvent("local", control.Permission.ADMIN,
-                                     MessageChain.create([Plain(in_str)]))
+                        CommandEvent(
+                            "local",
+                            control.Permission.ADMIN,
+                            MessageChain.create([Plain(in_str)]),
+                        )
                     )
                 except Exception as e:
                     logger.exception(e)
