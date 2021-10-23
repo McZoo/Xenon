@@ -103,7 +103,7 @@ async def sys_info(event: CommandEvent):
                 f"CPU：{psutil.cpu_count()}cores @ {psutil.cpu_percent()}%\n"
                 f"内存：{get_mem_repr(mem_info.used)}/{get_mem_repr(mem_info.total)} {mem_info.percent}%\n"
                 f"Python: {platform.python_implementation()} @ {platform.python_version()}\n"
-                f"已运行: {time.time() - start_time}s"
+                f"已运行: {time.time() - start_time:.2}s"
             )
         ]
     )
