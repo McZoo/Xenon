@@ -114,7 +114,7 @@ summary = "A list-like structure which implements collections.abc.MutableSequenc
 
 [[package]]
 name = "graia-ariadne"
-version = "0.5.3.post1"
+version = "0.5.3.post2"
 requires_python = ">=3.8,<4.0"
 summary = "Another elegant Python QQ Bot framework for mirai and mirai-api-http v2."
 dependencies = [
@@ -129,14 +129,14 @@ dependencies = [
 
 [[package]]
 name = "graia-ariadne"
-version = "0.5.3.post1"
+version = "0.5.3.post2"
 extras = ["full"]
 requires_python = ">=3.8,<4.0"
 summary = "Another elegant Python QQ Bot framework for mirai and mirai-api-http v2."
 dependencies = [
     "aiohttp<4.0.0,>=3.7.4",
     "arclet-alconna<0.5.0,>=0.4.1",
-    "graia-ariadne>=0.5.2.post1",
+    "graia-ariadne>=0.5.3.post2",
     "graia-broadcast<0.16.0,>=0.15.6",
     "graia-saya<0.0.15,>=0.0.14",
     "graia-scheduler<0.0.7,>=0.0.6",
@@ -227,6 +227,11 @@ summary = "Experimental type system extensions for programs checked with the myp
 name = "pathspec"
 version = "0.9.0"
 summary = "Utility library for gitignore style pattern matching of file paths."
+
+[[package]]
+name = "peewee"
+version = "3.14.8"
+summary = "a little orm"
 
 [[package]]
 name = "pillow"
@@ -326,7 +331,7 @@ dependencies = [
 
 [metadata]
 lock_version = "3.1"
-content_hash = "sha256:7db27401fc8309e427af9867c9524a01f9372ab6113b4a093fa289f2e8b20f20"
+content_hash = "sha256:1713f45b9ffcf179137312a9731716edbb55728f52b7d72153a605c5a46468cb"
 
 [metadata.files]
 "aiohttp 3.8.1" = [
@@ -532,9 +537,9 @@ content_hash = "sha256:7db27401fc8309e427af9867c9524a01f9372ab6113b4a093fa289f2e
     {file = "frozenlist-1.3.0-cp39-cp39-win_amd64.whl", hash = "sha256:772965f773757a6026dea111a15e6e2678fbd6216180f82a48a40b27de1ee2ab"},
     {file = "frozenlist-1.3.0.tar.gz", hash = "sha256:ce6f2ba0edb7b0c1d8976565298ad2deba6f8064d2bebb6ffce2ca896eb35b0b"},
 ]
-"graia-ariadne 0.5.3.post1" = [
-    {file = "graia_ariadne-0.5.3.post1-py3-none-any.whl", hash = "sha256:d9cf5e61379473aeaecfcbffe561e09b2fe7810b18f0717c33e0deec5cc2ff0c"},
-    {file = "graia-ariadne-0.5.3.post1.tar.gz", hash = "sha256:a7d998484bef9414ac63f1e6d66812b554cb2335edaae75be2d030afbc8f3689"},
+"graia-ariadne 0.5.3.post2" = [
+    {file = "graia_ariadne-0.5.3.post2-py3-none-any.whl", hash = "sha256:86885a9a7ef9d8bea21d39dac91c701801598d9421bac003b2266d8b9bebac79"},
+    {file = "graia-ariadne-0.5.3.post2.tar.gz", hash = "sha256:9b5f465e8acff1a41c250572ebd46fb5825c29215ed2f64bc3f7b5a51f3ddffa"},
 ]
 "graia-broadcast 0.15.6" = [
     {file = "graia_broadcast-0.15.6-py3-none-any.whl", hash = "sha256:79ac2ece113b3efd25070a095a56c2f81a114a9dcb023b21414e34cdfa82540a"},
@@ -636,6 +641,9 @@ content_hash = "sha256:7db27401fc8309e427af9867c9524a01f9372ab6113b4a093fa289f2e
 "pathspec 0.9.0" = [
     {file = "pathspec-0.9.0-py2.py3-none-any.whl", hash = "sha256:7d15c4ddb0b5c802d161efc417ec1a2558ea2653c2e8ad9c19098201dc1c993a"},
     {file = "pathspec-0.9.0.tar.gz", hash = "sha256:e564499435a2673d586f6b2130bb5b95f04a3ba06f81b8f895b651a3c76aabb1"},
+]
+"peewee 3.14.8" = [
+    {file = "peewee-3.14.8.tar.gz", hash = "sha256:01bd7f734defb08d7a3346a0c0ca7011bc8d0d685934ec0e001b3371d522ec53"},
 ]
 "pillow 9.0.1" = [
     {file = "Pillow-9.0.1-1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:a5d24e1d674dd9d72c66ad3ea9131322819ff86250b30dc5821cbafcfa0b96b4"},
