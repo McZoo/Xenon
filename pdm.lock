@@ -114,7 +114,7 @@ summary = "A list-like structure which implements collections.abc.MutableSequenc
 
 [[package]]
 name = "graia-ariadne"
-version = "0.5.3.post2"
+version = "0.5.3.post3"
 requires_python = ">=3.8,<4.0"
 summary = "Another elegant Python QQ Bot framework for mirai and mirai-api-http v2."
 dependencies = [
@@ -129,14 +129,14 @@ dependencies = [
 
 [[package]]
 name = "graia-ariadne"
-version = "0.5.3.post2"
+version = "0.5.3.post3"
 extras = ["full"]
 requires_python = ">=3.8,<4.0"
 summary = "Another elegant Python QQ Bot framework for mirai and mirai-api-http v2."
 dependencies = [
     "aiohttp<4.0.0,>=3.7.4",
     "arclet-alconna<0.5.0,>=0.4.1",
-    "graia-ariadne>=0.5.3.post2",
+    "graia-ariadne",
     "graia-broadcast<0.16.0,>=0.15.6",
     "graia-saya<0.0.15,>=0.0.14",
     "graia-scheduler<0.0.7,>=0.0.6",
@@ -331,7 +331,7 @@ dependencies = [
 
 [metadata]
 lock_version = "3.1"
-content_hash = "sha256:1713f45b9ffcf179137312a9731716edbb55728f52b7d72153a605c5a46468cb"
+content_hash = "sha256:17b493404ed77a1b14c52bc6f9259aa9d0ea51e31f1bfa23a3b76ea130c624d9"
 
 [metadata.files]
 "aiohttp 3.8.1" = [
@@ -537,9 +537,9 @@ content_hash = "sha256:1713f45b9ffcf179137312a9731716edbb55728f52b7d72153a605c5a
     {file = "frozenlist-1.3.0-cp39-cp39-win_amd64.whl", hash = "sha256:772965f773757a6026dea111a15e6e2678fbd6216180f82a48a40b27de1ee2ab"},
     {file = "frozenlist-1.3.0.tar.gz", hash = "sha256:ce6f2ba0edb7b0c1d8976565298ad2deba6f8064d2bebb6ffce2ca896eb35b0b"},
 ]
-"graia-ariadne 0.5.3.post2" = [
-    {file = "graia_ariadne-0.5.3.post2-py3-none-any.whl", hash = "sha256:86885a9a7ef9d8bea21d39dac91c701801598d9421bac003b2266d8b9bebac79"},
-    {file = "graia-ariadne-0.5.3.post2.tar.gz", hash = "sha256:9b5f465e8acff1a41c250572ebd46fb5825c29215ed2f64bc3f7b5a51f3ddffa"},
+"graia-ariadne 0.5.3.post3" = [
+    {file = "graia_ariadne-0.5.3.post3-py3-none-any.whl", hash = "sha256:359eec463af7db9cec3b5074c9289b51bf59a1f327583ed08594d262ea91e0cf"},
+    {file = "graia-ariadne-0.5.3.post3.tar.gz", hash = "sha256:2ce7c4812b1486a43783502a68b330d5114487b4ad05e50c00be42df73e33a65"},
 ]
 "graia-broadcast 0.15.6" = [
     {file = "graia_broadcast-0.15.6-py3-none-any.whl", hash = "sha256:79ac2ece113b3efd25070a095a56c2f81a114a9dcb023b21414e34cdfa82540a"},
