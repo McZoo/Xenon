@@ -1,43 +1,44 @@
-# coding=utf-8
-import asyncio
-from asyncio import CancelledError
-from typing import cast
-
-from graia.application import AbstractLogger, GraiaMiraiApplication
-from graia.application.exceptions import InvaildSession
-from graia.broadcast import Broadcast
+from graia.ariadne.app import Ariadne
+from graia.ariadne.console import Console
+from graia.ariadne.console.saya import ConsoleBehaviour
+from graia.ariadne.message.commander import Commander
+from graia.ariadne.message.commander.saya import CommanderBehaviour
+from graia.ariadne.model import MiraiSession
 from graia.saya import Saya
 from graia.saya.builtins.broadcast import BroadcastBehaviour
 from graia.scheduler import GraiaScheduler
-from graia.scheduler.saya import GraiaSchedulerBehaviour
-from loguru import logger
+from graia.scheduler.saya.behaviour import GraiaSchedulerBehaviour
+from prompt_toolkit.styles.style import Style
+from pydantic.networks import AnyHttpUrl
 
-import lib
+import module
+from library import __version__ as lib_version
+from library.config import XConfig
 
-if __name__ == "__main__":
-    lib.utils.config_logger()
-    logger.info(f"Xenon {lib.__version__}")
-    con = lib.console.Console()
-    con.start()
-    lib.state = "RUN"
-    loop = asyncio.new_event_loop()
-    session = lib.utils.get_session(con)
-    bcc = Broadcast(loop=loop)
-    con.set_bcc(bcc)
-    scheduler = GraiaScheduler(loop, bcc)
-    db = lib.database.Database()
-    loop.run_until_complete(lib.control.Permission.open_db())
-    app = GraiaMiraiApplication(
-        broadcast=bcc, connect_info=session, logger=cast(AbstractLogger, logger)
+
+class SessionConfig(XConfig):
+    __scope__: str = "session"
+    __dest__: str = "global"
+    host: AnyHttpUrl
+    account: int
+    verify_key: str
+
+
+if __name__ == """__main__""":
+    ariadne = Ariadne(MiraiSession(**SessionConfig().dict()))
+    saya = ariadne.create(Saya)
+    con = ariadne.create(Console)
+    con.l_prompt = f"Xenon {lib_version} > "
+    con.style = Style([("", "blue")])
+    ariadne.create(GraiaScheduler)
+    ariadne.create(Commander)
+    saya.install_behaviours(
+        ariadne.create(BroadcastBehaviour),
+        ariadne.create(GraiaSchedulerBehaviour),
+        ariadne.create(ConsoleBehaviour),
+        ariadne.create(CommanderBehaviour),
     )
-    lib.command.initialize(bcc)
-    saya = Saya(bcc)
-    saya.install_behaviours(BroadcastBehaviour(bcc))
-    saya.install_behaviours(GraiaSchedulerBehaviour(scheduler))
     with saya.module_context():
-        plugins = lib.plugin.load_plugins(saya)
-    try:
-        app.launch_blocking()
-    except (CancelledError, InvaildSession):
-        loop.run_until_complete(db.close())
-    con.stop()
+        for mod in module.__all__:
+            saya.require(f"module.{mod}")
+    ariadne.launch_blocking()
