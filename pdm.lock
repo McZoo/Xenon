@@ -24,7 +24,8 @@ dependencies = [
 
 [[package]]
 name = "arclet-alconna"
-version = "0.4.3"
+version = "0.6.4"
+requires_python = ">=3.8"
 summary = "A Fast Command Analyser based on Dict"
 
 [[package]]
@@ -129,22 +130,15 @@ dependencies = [
 
 [[package]]
 name = "graia-ariadne"
-version = "0.5.3.post3"
+version = "0.6.0.post1"
 extras = ["full"]
 requires_python = ">=3.8,<4.0"
 summary = "Another elegant Python QQ Bot framework for mirai and mirai-api-http v2."
 dependencies = [
-    "aiohttp<4.0.0,>=3.7.4",
-    "arclet-alconna<0.5.0,>=0.4.1",
+    "arclet-alconna<0.7,>=0.6",
     "graia-ariadne",
-    "graia-broadcast<0.16.0,>=0.15.6",
     "graia-saya<0.0.15,>=0.0.14",
     "graia-scheduler<0.0.7,>=0.0.6",
-    "loguru<0.7,>=0.6",
-    "prompt-toolkit<4.0.0,>=3.0.24",
-    "pydantic<2.0.0,>=1.8.2",
-    "typing-extensions<5.0.0,>=4.0.0",
-    "yarl<2.0,>=1.7",
 ]
 
 [[package]]
@@ -226,6 +220,7 @@ summary = "Experimental type system extensions for programs checked with the myp
 [[package]]
 name = "pathspec"
 version = "0.9.0"
+requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 summary = "Utility library for gitignore style pattern matching of file paths."
 
 [[package]]
@@ -331,7 +326,7 @@ dependencies = [
 
 [metadata]
 lock_version = "3.1"
-content_hash = "sha256:17b493404ed77a1b14c52bc6f9259aa9d0ea51e31f1bfa23a3b76ea130c624d9"
+content_hash = "sha256:dab0ed8b69dd3175c484cd50bdd6a3d6f622825a19a8137e679e62211f0d5439"
 
 [metadata.files]
 "aiohttp 3.8.1" = [
@@ -412,8 +407,8 @@ content_hash = "sha256:17b493404ed77a1b14c52bc6f9259aa9d0ea51e31f1bfa23a3b76ea13
     {file = "aiosignal-1.2.0-py3-none-any.whl", hash = "sha256:26e62109036cd181df6e6ad646f91f0dcfd05fe16d0cb924138ff2ab75d64e3a"},
     {file = "aiosignal-1.2.0.tar.gz", hash = "sha256:78ed67db6c7b7ced4f98e495e572106d5c432a93e1ddd1bf475e1dc05f5b7df2"},
 ]
-"arclet-alconna 0.4.3" = [
-    {file = "arclet-alconna-0.4.3.tar.gz", hash = "sha256:05feaabde7fe1b5eb3c0f649a906d5ed8f3b160aff7c8b2b9cde173d65b8cebc"},
+"arclet-alconna 0.6.4" = [
+    {file = "arclet-alconna-0.6.4.tar.gz", hash = "sha256:d9e5616ccb4c132d5c68de5817e8a05b3ac1163f74480ed5cf22491f93babe11"},
 ]
 "async-timeout 4.0.2" = [
     {file = "async_timeout-4.0.2-py3-none-any.whl", hash = "sha256:8ca1e4fcf50d07413d66d1a5e416e42cfdf5851c981d679a09851a6853383b3c"},
@@ -540,6 +535,10 @@ content_hash = "sha256:17b493404ed77a1b14c52bc6f9259aa9d0ea51e31f1bfa23a3b76ea13
 "graia-ariadne 0.5.3.post3" = [
     {file = "graia_ariadne-0.5.3.post3-py3-none-any.whl", hash = "sha256:359eec463af7db9cec3b5074c9289b51bf59a1f327583ed08594d262ea91e0cf"},
     {file = "graia-ariadne-0.5.3.post3.tar.gz", hash = "sha256:2ce7c4812b1486a43783502a68b330d5114487b4ad05e50c00be42df73e33a65"},
+]
+"graia-ariadne 0.6.0.post1" = [
+    {file = "graia_ariadne-0.6.0.post1-py3-none-any.whl", hash = "sha256:e7aa53fe83b09b024edab46a850007aafa263a0c2152e489811fac34de69445c"},
+    {file = "graia-ariadne-0.6.0.post1.tar.gz", hash = "sha256:ac3133b39db7fa2dac1ae9f2413229c256aeea3613bab84a0a0dd3adf5a02b24"},
 ]
 "graia-broadcast 0.15.6" = [
     {file = "graia_broadcast-0.15.6-py3-none-any.whl", hash = "sha256:79ac2ece113b3efd25070a095a56c2f81a114a9dcb023b21414e34cdfa82540a"},
